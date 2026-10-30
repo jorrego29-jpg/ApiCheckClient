@@ -1,26 +1,81 @@
+// ═══════════════════════════════════════════════════════════════════
+//  OBSIDIAN CYBER WORKBENCH — Design System
+//  Fuente: Stitch project "Futuristic API Testing Platform"
+//  Paleta: Cyber Cyan (#00F2FE) · Electric Violet (#7928CA) · Emerald (#10B981)
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Fuentes ────────────────────────────────────────────────────────
 :root {
-  color-scheme: light dark;
+  --font-sans:  'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  // ── Paleta oscura base ──────────────────────────────────────────
+  --bg:               #07080B;          // abyss canvas
+  --surface:          #0B0D13;          // workbench panes / sidebar
+  --surface-2:        #131720;          // active controls, toolbar
+  --surface-3:        #1E2130;          // hover states / cards
+  --surface-4:        #282A30;          // elevated cards
 
-  --bg: light-dark(#f4f5f7, #121418);
-  // Superficie, borde, texto y acento salen del tema de PrimeNG (Aura), para que
-  // el resto de la app y los componentes de PrimeNG compartan la misma paleta.
-  --surface: var(--p-content-background);
-  --surface-2: var(--p-content-hover-background);
-  --border: var(--p-content-border-color);
-  --text: var(--p-text-color);
-  --text-muted: var(--p-text-muted-color);
-  --accent: var(--p-primary-color);
-  --ok: light-dark(#14753a, #4bd37b);
-  --warn: light-dark(#a15c00, #f0b04a);
-  --danger: light-dark(#b42318, #ff8a80);
+  // Integración PrimeNG (Aura dark) — tokens que Shell y demás componentes usan
+  --p-content-background:           var(--surface);
+  --p-content-hover-background:     var(--surface-2);
+  --p-content-border-color:         rgba(255,255,255,0.08);
+  --p-text-color:                   #E2E2EB;
+  --p-text-muted-color:             #B9CACB;
+  --p-primary-color:                #00F2FE;
 
-  --topbar-height: 48px;
-  --radius: 8px;
+  // ── Aliases heredados para Shell ───────────────────────────────
+  --surface-alias:   var(--surface);
+  --border:          rgba(255, 255, 255, 0.08);
+  --border-active:   rgba(0, 242, 254, 0.35);
+  --text:            #E2E2EB;
+  --text-muted:      #849495;
+
+  // ── Colores de acento ──────────────────────────────────────────
+  --cyan:            #00F2FE;           // Primary: REST, CTAs, estados activos
+  --cyan-dim:        #00DCE6;
+  --cyan-glow:       rgba(0, 242, 254, 0.30);
+  --cyan-wash:       rgba(0, 242, 254, 0.05);
+  --cyan-border:     rgba(0, 242, 254, 0.25);
+
+  --violet:          #7928CA;           // Secondary: SOAP/WSDL, auth
+  --violet-dim:      #6807BA;
+  --violet-glow:     rgba(121, 40, 202, 0.30);
+
+  --emerald:         #10B981;           // Tertiary: 2xx success, healthy
+  --amber:           #F59E0B;           // 3xx redirect / PUT
+  --orange:          #F97316;           // 4xx client error
+  --crimson:         #EF4444;           // 5xx server error / DELETE
+  --purple:          #A855F7;           // PATCH
+
+  // ── Estados semánticos ─────────────────────────────────────────
+  --ok:              var(--emerald);
+  --warn:            var(--amber);
+  --danger:          var(--crimson);
+
+  // ── Elevación (border-top hairline) ───────────────────────────
+  --hairline-dim:    rgba(255, 255, 255, 0.06);
+  --hairline:        rgba(255, 255, 255, 0.12);
+  --hairline-cyan:   rgba(0, 242, 254, 0.25);
+
+  // ── Layout ────────────────────────────────────────────────────
+  --topbar-height:   48px;
+  --radius:          4px;
+  --radius-md:       6px;
+  --radius-lg:       8px;
+  --radius-pill:     9999px;
+
+  // ── Tipografía ────────────────────────────────────────────────
+  --text-xs:   0.6875rem;   // 11px
+  --text-sm:   0.75rem;     // 12px
+  --text-md:   0.8125rem;   // 13px
+  --text-base: 0.9375rem;   // 15px
+  --text-lg:   1rem;        // 16px
+  --text-xl:   1.25rem;     // 20px
+  --text-2xl:  1.75rem;     // 28px
 }
 
+// ── Reset ─────────────────────────────────────────────────────────
 *,
 *::before,
 *::after {
@@ -36,32 +91,66 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.45 var(--font-sans);
+  font: var(--text-md) / 1.45 var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  font-variant-numeric: tabular-nums;
 }
 
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
+h1, h2, h3, p { margin: 0; }
 
-button,
-input {
-  font: inherit;
-  color: inherit;
-}
+button, input { font: inherit; color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--cyan);
   outline-offset: 1px;
 }
 
-// Divisores de panel (p-splitter): ocupan todo el alto disponible y sin marco propio.
+// ── Scrollbar ─────────────────────────────────────────────────────
+::-webkit-scrollbar          { width: 6px; height: 6px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,242,254,0.35); }
+
+// ── PrimeNG Splitter ──────────────────────────────────────────────
 .app-splitter {
   height: 100%;
   border: 0;
   border-radius: 0;
   background: transparent;
+
+  // Gutter / divider bar
+  .p-splitter-gutter {
+    background: var(--border);
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--border-active);
+    }
+  }
+}
+
+// ── PrimeNG Select (Workspace / Entorno) ─────────────────────────
+.p-select {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--radius) !important;
+  font-family: var(--font-mono) !important;
+  font-size: var(--text-sm) !important;
+  color: var(--text-muted) !important;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: var(--border-active) !important;
+  }
+  &:focus-within {
+    border-color: var(--cyan) !important;
+    box-shadow: 0 0 0 2px var(--cyan-glow) !important;
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+.p-toast {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
 }

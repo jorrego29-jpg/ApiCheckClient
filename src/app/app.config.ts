@@ -15,8 +15,9 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: {
         preset: Aura,
-        // Sigue el modo claro/oscuro del sistema, igual que los tokens de styles.scss.
-        options: { darkModeSelector: 'system' },
+        // Obsidian Cyber Workbench: siempre dark (Stitch design).
+        // El selector '.dark' se añade en <html> desde index.html / app bootstrap.
+        options: { darkModeSelector: '.dark' },
       },
     }),
     // PrimeNG no lo registra por sí mismo: lo usa <p-toast> y NotificationService.
