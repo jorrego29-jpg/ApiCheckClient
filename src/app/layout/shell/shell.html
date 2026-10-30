@@ -1,9 +1,31 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Shell — Obsidian Cyber Workbench (Responsive)
+     Mobile <768 | Tablet 768-1023 | Desktop ≥1024
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- ── Topbar ─────────────────────────────────────────────────── -->
 <header class="topbar">
+
+  <!-- Sidebar toggle (tablet + mobile) -->
+  @if (!isDesktop()) {
+    <button
+      type="button"
+      class="sidebar-toggle"
+      [class.is-active]="sidebarOpen()"
+      [attr.aria-expanded]="sidebarOpen()"
+      aria-label="Abrir/cerrar colecciones"
+      (click)="toggleSidebar()"
+    >
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+    </button>
+  }
 
   <!-- Brand -->
   <span class="brand" aria-label="APICheck">APICheck</span>
 
-  <!-- Workspace / Entorno selectors -->
+  <!-- Workspace / Entorno selectors (ocultos en mobile) -->
   <div class="controls">
     <p-select
       class="control"
@@ -32,71 +54,219 @@
     (click)="apiStatus.check()"
   >
     <span class="dot" aria-hidden="true"></span>
-    {{ statusLabel() }}
+    <span class="status-label">{{ statusLabel() }}</span>
   </button>
 
 </header>
 
-<div class="body">
-  <p-splitter
-    styleClass="app-splitter"
-    layout="horizontal"
-    stateStorage="local"
-    stateKey="apicheck.layout.main"
-    [panelSizes]="[22, 78]"
-    [minSizes]="[15, 40]"
-    [gutterSize]="4"
-  >
-    <!-- Sidebar: Collections + History -->
-    <ng-template pTemplate>
-      <aside class="sidebar" aria-label="Colecciones e historial">
+<!-- ══════════════════════════════════════════════════════════════
+     DESKTOP ≥1024px — Triple-pane splitter layout
+     ══════════════════════════════════════════════════════════════ -->
+@if (isDesktop()) {
+  <div class="body">
+    <p-splitter
+      styleClass="app-splitter"
+      layout="horizontal"
+      stateStorage="local"
+      stateKey="apicheck.layout.main"
+      [panelSizes]="[22, 78]"
+      [minSizes]="[15, 40]"
+      [gutterSize]="4"
+    >
+      <!-- Sidebar: Collections + History -->
+      <ng-template pTemplate>
+        <aside class="sidebar" aria-label="Colecciones e historial">
+          <section class="panel">
+            <h2>Colecciones</h2>
+            <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
+          </section>
+          <section class="panel">
+            <h2>Historial</h2>
+            <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
+          </section>
+        </aside>
+      </ng-template>
 
-        <section class="panel">
-          <h2>Colecciones</h2>
-          <p class="empty">
-            Aquí aparecerá el árbol de colecciones, carpetas y peticiones.
-          </p>
+      <!-- Editor: Request + Response split -->
+      <ng-template pTemplate>
+        <main class="editor">
+          <p-splitter
+            styleClass="app-splitter"
+            layout="vertical"
+            stateStorage="local"
+            stateKey="apicheck.layout.editor"
+            [panelSizes]="[62, 38]"
+            [minSizes]="[25, 15]"
+            [gutterSize]="4"
+          >
+            <ng-template pTemplate>
+              <section class="request" aria-label="Petición">
+                <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+              </section>
+            </ng-template>
+            <ng-template pTemplate>
+              <section class="response" aria-label="Respuesta">
+                <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+              </section>
+            </ng-template>
+          </p-splitter>
+        </main>
+      </ng-template>
+    </p-splitter>
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════════
+     TABLET 768–1023px — Sidebar como panel deslizable
+     ══════════════════════════════════════════════════════════════ -->
+@if (!isDesktop() && !isMobile()) {
+  <div class="body body--tablet">
+
+    <!-- Overlay backdrop -->
+    @if (sidebarOpen()) {
+      <div
+        class="sidebar-backdrop"
+        aria-hidden="true"
+        (click)="closeSidebar()"
+      ></div>
+    }
+
+    <!-- Sidebar deslizable -->
+    <aside
+      class="sidebar sidebar--drawer"
+      [class.is-open]="sidebarOpen()"
+      aria-label="Colecciones e historial"
+    >
+      <div class="drawer-header">
+        <span class="drawer-title">Explorador</span>
+        <button type="button" class="drawer-close" aria-label="Cerrar" (click)="closeSidebar()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <section class="panel">
+        <h2>Colecciones</h2>
+        <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
+      </section>
+      <section class="panel">
+        <h2>Historial</h2>
+        <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
+      </section>
+    </aside>
+
+    <!-- Editor full-width: vertical splitter -->
+    <main class="editor editor--full">
+      <p-splitter
+        styleClass="app-splitter"
+        layout="vertical"
+        stateStorage="local"
+        stateKey="apicheck.layout.editor.tablet"
+        [panelSizes]="[60, 40]"
+        [minSizes]="[25, 15]"
+        [gutterSize]="4"
+      >
+        <ng-template pTemplate>
+          <section class="request" aria-label="Petición">
+            <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+          </section>
+        </ng-template>
+        <ng-template pTemplate>
+          <section class="response" aria-label="Respuesta">
+            <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+          </section>
+        </ng-template>
+      </p-splitter>
+    </main>
+
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════════
+     MOBILE <768px — Drawer sidebar + tabs Builder / Output
+     ══════════════════════════════════════════════════════════════ -->
+@if (isMobile()) {
+  <div class="body body--mobile">
+
+    <!-- Overlay backdrop -->
+    @if (sidebarOpen()) {
+      <div
+        class="sidebar-backdrop"
+        aria-hidden="true"
+        (click)="closeSidebar()"
+      ></div>
+    }
+
+    <!-- Sidebar drawer -->
+    <aside
+      class="sidebar sidebar--drawer"
+      [class.is-open]="sidebarOpen()"
+      aria-label="Colecciones e historial"
+    >
+      <div class="drawer-header">
+        <span class="drawer-title">Explorador</span>
+        <button type="button" class="drawer-close" aria-label="Cerrar" (click)="closeSidebar()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <section class="panel">
+        <h2>Colecciones</h2>
+        <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
+      </section>
+      <section class="panel">
+        <h2>Historial</h2>
+        <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
+      </section>
+    </aside>
+
+    <!-- Tab bar -->
+    <nav class="mobile-tabs" role="tablist" aria-label="Secciones del editor">
+      <button
+        role="tab"
+        type="button"
+        class="mobile-tab"
+        [class.is-active]="mobileTab() === 'builder'"
+        [attr.aria-selected]="mobileTab() === 'builder'"
+        (click)="setMobileTab('builder')"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="12" height="4" rx="1" stroke="currentColor" stroke-width="1.25"/>
+          <rect x="1" y="8" width="7" height="1.5" rx="0.75" fill="currentColor"/>
+          <rect x="1" y="11" width="5" height="1.5" rx="0.75" fill="currentColor"/>
+        </svg>
+        Constructor
+      </button>
+      <button
+        role="tab"
+        type="button"
+        class="mobile-tab"
+        [class.is-active]="mobileTab() === 'output'"
+        [attr.aria-selected]="mobileTab() === 'output'"
+        (click)="setMobileTab('output')"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M2 4l3 3-3 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 10h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+        </svg>
+        Respuesta
+      </button>
+    </nav>
+
+    <!-- Tab content -->
+    <main class="mobile-content">
+      @if (mobileTab() === 'builder') {
+        <section class="request request--mobile" role="tabpanel" aria-label="Constructor de petición">
+          <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
         </section>
-
-        <section class="panel">
-          <h2>Historial</h2>
-          <p class="empty">
-            Aquí aparecerán las últimas ejecuciones.
-          </p>
+      }
+      @if (mobileTab() === 'output') {
+        <section class="response response--mobile" role="tabpanel" aria-label="Respuesta">
+          <p class="empty">Envía una petición para ver aquí la respuesta.</p>
         </section>
+      }
+    </main>
 
-      </aside>
-    </ng-template>
-
-    <!-- Editor: Request + Response split -->
-    <ng-template pTemplate>
-      <main class="editor">
-        <p-splitter
-          styleClass="app-splitter"
-          layout="vertical"
-          stateStorage="local"
-          stateKey="apicheck.layout.editor"
-          [panelSizes]="[62, 38]"
-          [minSizes]="[25, 15]"
-          [gutterSize]="4"
-        >
-          <ng-template pTemplate>
-            <section class="request" aria-label="Petición">
-              <p class="empty">
-                Selecciona una petición del árbol o crea una nueva para empezar.
-              </p>
-            </section>
-          </ng-template>
-
-          <ng-template pTemplate>
-            <section class="response" aria-label="Respuesta">
-              <p class="empty">
-                Envía una petición para ver aquí la respuesta.
-              </p>
-            </section>
-          </ng-template>
-        </p-splitter>
-      </main>
-    </ng-template>
-  </p-splitter>
-</div>
+  </div>
+}

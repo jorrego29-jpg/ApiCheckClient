@@ -95,6 +95,10 @@ body {
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'liga' 1, 'calt' 1;
   font-variant-numeric: tabular-nums;
+  // Evita zoom en inputs en iOS
+  -webkit-text-size-adjust: 100%;
+  // Safe area para notch/home-bar en iPhone
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 h1, h2, h3, p { margin: 0; }
