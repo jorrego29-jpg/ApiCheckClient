@@ -1,0 +1,84 @@
+<header class="topbar">
+  <span class="brand">APICheck</span>
+
+  <div class="controls">
+    <p-select
+      class="control"
+      [options]="[]"
+      [disabled]="true"
+      placeholder="Sin workspace"
+      ariaLabel="Workspace"
+      title="Se habilita en la fase 2"
+    />
+    <p-select
+      class="control"
+      [options]="[]"
+      [disabled]="true"
+      placeholder="Sin entorno"
+      ariaLabel="Entorno"
+      title="Se habilita en la fase 4"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="api-status"
+    [attr.data-state]="apiStatus.state()"
+    [title]="statusHint()"
+    (click)="apiStatus.check()"
+  >
+    <span class="dot" aria-hidden="true"></span>
+    {{ statusLabel() }}
+  </button>
+</header>
+
+<div class="body">
+  <p-splitter
+    styleClass="app-splitter"
+    layout="horizontal"
+    stateStorage="local"
+    stateKey="apicheck.layout.main"
+    [panelSizes]="[22, 78]"
+    [minSizes]="[15, 40]"
+    [gutterSize]="6"
+  >
+    <ng-template pTemplate>
+      <aside class="sidebar" aria-label="Colecciones e historial">
+        <section class="panel">
+          <h2>Colecciones</h2>
+          <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
+        </section>
+        <section class="panel">
+          <h2>Historial</h2>
+          <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
+        </section>
+      </aside>
+    </ng-template>
+
+    <ng-template pTemplate>
+      <main class="editor">
+        <p-splitter
+          styleClass="app-splitter"
+          layout="vertical"
+          stateStorage="local"
+          stateKey="apicheck.layout.editor"
+          [panelSizes]="[62, 38]"
+          [minSizes]="[25, 15]"
+          [gutterSize]="6"
+        >
+          <ng-template pTemplate>
+            <section class="request" aria-label="Petición">
+              <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+            </section>
+          </ng-template>
+
+          <ng-template pTemplate>
+            <section class="response" aria-label="Respuesta">
+              <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+            </section>
+          </ng-template>
+        </p-splitter>
+      </main>
+    </ng-template>
+  </p-splitter>
+</div>
