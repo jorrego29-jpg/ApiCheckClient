@@ -171,10 +171,37 @@ describe('RequestEditor', () => {
     expect(button('Enviar')!.disabled).toBe(true);
   });
 
-  it('explains that SOAP requests come later', async () => {
-    await openWith(savedRequest('r1', { protocol: 'SOAP', method: null }));
+  describe('a SOAP request', () => {
+    const soap = (overrides: Partial<SavedRequest> = {}) =>
+      savedRequest('r1', {
+        protocol: 'SOAP',
+        method: null,
+        url: 'https://svc.test/calc',
+        soapAction: 'urn:Add',
+        body: { type: 'xml', content: '<soap:Envelope/>' },
+        ...overrides,
+      });
 
-    expect(element().textContent).toContain('fase 5');
-    expect(urlInput()).toBeNull();
+    it('shows the protocol instead of the HTTP method, and the SOAP editor below', async () => {
+      await openWith(soap());
+
+      expect(element().querySelector('.urlbar .protocol')?.textContent?.trim()).toBe('SOAP');
+      expect(element().querySelector('.urlbar .method')).toBeNull();
+      expect(urlInput().value).toBe('https://svc.test/calc');
+      expect(element().querySelector('app-soap-editor')).not.toBeNull();
+      expect(element().querySelector('app-key-value-table')).toBeNull();
+    });
+
+    it('can be sent once it has an endpoint and an envelope', async () => {
+      await openWith(soap());
+
+      expect(button('Enviar')!.disabled).toBe(false);
+    });
+
+    it('cannot be sent without an envelope', async () => {
+      await openWith(soap({ body: null }));
+
+      expect(button('Enviar')!.disabled).toBe(true);
+    });
   });
 });

@@ -32,6 +32,7 @@ import { KeyValueTable } from '../../shared/components/key-value-table/key-value
 import { VariableInput } from '../../shared/components/variable-input/variable-input';
 import { AuthPanel } from './auth-panel';
 import { BodyPanel } from './body-panel';
+import { SoapEditor } from './soap-editor';
 import { TabsBar } from './tabs-bar';
 
 type Section = 'params' | 'headers' | 'body' | 'auth';
@@ -57,6 +58,7 @@ const activeRows = (rows: readonly KeyValue[]) =>
     KeyValueTable,
     BodyPanel,
     AuthPanel,
+    SoapEditor,
   ],
   templateUrl: './request-editor.html',
   styleUrl: './request-editor.scss',
@@ -94,6 +96,10 @@ export class RequestEditor {
   protected readonly sendHint = computed(() => {
     const draft = this.tab()?.draft;
     if (!draft) return '';
+    if (draft.protocol === 'SOAP') {
+      if (!draft.url.trim()) return 'Escribe la URL del servicio para enviar';
+      return draft.body.content.trim() ? 'Enviar (Ctrl+Enter)' : 'Escribe el envelope para enviar';
+    }
     if (!isExecutableMethod(draft.method)) return `${draft.method} aún no se puede ejecutar`;
     return draft.url.trim() ? 'Enviar (Ctrl+Enter)' : 'Escribe una URL para enviar';
   });

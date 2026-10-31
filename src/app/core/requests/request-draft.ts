@@ -43,11 +43,11 @@ export function isExecutableMethod(
   return (EXECUTABLE_METHODS as readonly string[]).includes(method ?? '');
 }
 
-/** Se puede enviar: REST, con un método que el backend ejecuta y una URL. */
+/** Se puede enviar: con URL y, en REST, un método que el backend ejecuta; en SOAP, un envelope. */
 export function canSend(draft: RequestDraft): boolean {
-  return (
-    draft.protocol === 'REST' && isExecutableMethod(draft.method) && draft.url.trim().length > 0
-  );
+  if (draft.url.trim().length === 0) return false;
+  if (draft.protocol === 'SOAP') return draft.body.content.trim().length > 0;
+  return isExecutableMethod(draft.method);
 }
 
 // ─── Petición guardada ⇄ borrador ───────────────────────────────────────────────
@@ -160,7 +160,7 @@ export function draftsEqual(a: RequestDraft, b: RequestDraft): boolean {
 
 export function toSaveDto(draft: RequestDraft): UpdateRequestDto {
   const normalized = normalizeDraft(draft);
-  return {
+  const base: UpdateRequestDto = {
     protocol: normalized.protocol,
     method: normalized.method,
     url: normalized.url,
@@ -169,6 +169,16 @@ export function toSaveDto(draft: RequestDraft): UpdateRequestDto {
     body: normalized.body,
     auth: normalized.auth,
   };
+  // SOAP no tiene método HTTP ni params (el endpoint se guarda tal cual) y sí SOAPAction y WSDL.
+  return normalized.protocol === 'SOAP'
+    ? {
+        ...base,
+        method: null,
+        queryParams: [],
+        soapAction: normalized.soapAction,
+        wsdlUrl: normalized.wsdlUrl,
+      }
+    : base;
 }
 
 // ─── URL ⇄ Params ───────────────────────────────────────────────────────────────
@@ -243,6 +253,8 @@ export function mergeParamsFromUrl(url: string, current: readonly KeyValue[]): K
 
 /** El usuario edita la URL: se actualizan los params. */
 export function withUrl(draft: RequestDraft, url: string): RequestDraft {
+  // El endpoint de un servicio SOAP no se parte en params.
+  if (draft.protocol === 'SOAP') return { ...draft, url };
   return { ...draft, url, params: mergeParamsFromUrl(url, draft.params) };
 }
 
@@ -319,13 +331,15 @@ export function toExecutionDto(
   draft: RequestDraft,
   context: ExecutionContext = {},
 ): ExecuteRequestDto {
-  if (!isExecutableMethod(draft.method)) {
-    throw new Error(`El método ${draft.method} no se puede ejecutar.`);
-  }
-
   const headers = kvToRecord(draft.headers);
   if (!hasHeader(headers, 'authorization')) {
     Object.assign(headers, buildAuthHeaders(draft.auth, context.resolve));
+  }
+
+  if (draft.protocol === 'SOAP') return toSoapExecutionDto(draft, headers, context);
+
+  if (!isExecutableMethod(draft.method)) {
+    throw new Error(`El método ${draft.method} no se puede ejecutar.`);
   }
 
   const content = draft.body.content;
@@ -348,6 +362,28 @@ export function toExecutionDto(
     ...(Object.keys(queryParams).length ? { queryParams } : {}),
     // El texto del body viaja tal cual: así las {{variables}} sin comillas siguen siendo válidas.
     ...(hasBody ? { body: content } : {}),
+    ...(context.workspaceId ? { workspaceId: context.workspaceId } : {}),
+    ...(context.environmentId ? { environmentId: context.environmentId } : {}),
+  };
+}
+
+/**
+ * SOAP con el envelope escrito a mano: se envía como body y el backend pone Content-Type y SOAPAction.
+ * No viaja `wsdlUrl`: con él el backend ejecutaría la operación por WSDL en vez de enviar este envelope.
+ */
+function toSoapExecutionDto(
+  draft: RequestDraft,
+  headers: Record<string, string>,
+  context: ExecutionContext,
+): ExecuteRequestDto {
+  const soapAction = (draft.soapAction ?? '').trim();
+  return {
+    ...(context.requestId ? { requestId: context.requestId } : {}),
+    protocol: 'SOAP',
+    url: withScheme(draft.url),
+    ...(Object.keys(headers).length ? { headers } : {}),
+    body: draft.body.content,
+    ...(soapAction ? { soapAction } : {}),
     ...(context.workspaceId ? { workspaceId: context.workspaceId } : {}),
     ...(context.environmentId ? { environmentId: context.environmentId } : {}),
   };

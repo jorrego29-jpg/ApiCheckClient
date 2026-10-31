@@ -17,6 +17,21 @@ app-request-editor {
     width: 112px;
   }
 
+  .urlbar .protocol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 112px;
+    height: 30px;
+    border: 1px solid var(--cyan-border);
+    border-radius: var(--radius-md);
+    background: var(--cyan-wash);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--cyan);
+  }
+
   .urlbar .url {
     --vi-padding-x: 0.6rem;
     --vi-padding-y: 0;

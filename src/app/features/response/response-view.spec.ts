@@ -5,6 +5,7 @@ import {
   formatBytes,
   formatDuration,
   headerRows,
+  prettyXml,
   statusKind,
   toResultView,
 } from './response-view';
@@ -114,6 +115,47 @@ describe('describeBody', () => {
   it('flags a body too big for the editor', () => {
     expect(describeBody('x'.repeat(LARGE_BODY + 1)).large).toBe(true);
     expect(describeBody('x'.repeat(10)).large).toBe(false);
+  });
+});
+
+describe('prettyXml', () => {
+  it('indents nested elements and keeps a simple value on its line', () => {
+    expect(prettyXml('<a><b>1</b><c><d/></c></a>')).toBe(
+      ['<a>', '  <b>1</b>', '  <c>', '    <d/>', '  </c>', '</a>'].join('\n'),
+    );
+  });
+
+  it('keeps the declaration, comments and CDATA as lines of their own', () => {
+    expect(prettyXml('<?xml version="1.0"?><a><!-- nota --><![CDATA[x > y]]></a>')).toBe(
+      ['<?xml version="1.0"?>', '<a>', '  <!-- nota -->', '  <![CDATA[x > y]]>', '</a>'].join('\n'),
+    );
+  });
+
+  it('does not stop at a > inside an attribute value', () => {
+    expect(prettyXml('<a x="1>2"><b/></a>')).toBe(['<a x="1>2">', '  <b/>', '</a>'].join('\n'));
+  });
+
+  it('formats a SOAP response', () => {
+    const xml =
+      '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><AddResponse xmlns="http://tempuri.org/"><AddResult>5</AddResult></AddResponse></soap:Body></soap:Envelope>';
+
+    expect(prettyXml(xml).split('\n')).toEqual([
+      '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">',
+      '  <soap:Body>',
+      '    <AddResponse xmlns="http://tempuri.org/">',
+      '      <AddResult>5</AddResult>',
+      '    </AddResponse>',
+      '  </soap:Body>',
+      '</soap:Envelope>',
+    ]);
+  });
+
+  it('is applied to a one-line XML body, and leaves an already formatted one alone', () => {
+    expect(describeBody('<a><b/></a>', { 'content-type': 'text/xml' }).text).toBe(
+      '<a>\n  <b/>\n</a>',
+    );
+    const formatted = '<a>\n<b/>\n</a>';
+    expect(describeBody(formatted).text).toBe(formatted);
   });
 });
 

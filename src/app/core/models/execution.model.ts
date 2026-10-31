@@ -76,6 +76,20 @@ export interface ExecutionResult {
   response: ExecutionResponse;
 }
 
+export type SoapVersion = '1.1' | '1.2';
+
+/** Una operación del WSDL lista para usarse: dónde se envía, con qué SOAPAction y un envelope de ejemplo. */
+export interface WsdlOperation {
+  name: string;
+  service: string;
+  port: string;
+  endpoint: string;
+  soapAction: string;
+  soapVersion: SoapVersion;
+  targetNamespace: string;
+  sampleEnvelope: string;
+}
+
 export interface WsdlMethod {
   name: string;
   inputParams: Record<string, unknown>;
@@ -86,4 +100,5 @@ export interface WsdlInspection {
   wsdlUrl: string;
   services: string[];
   methods: WsdlMethod[];
+  operations: WsdlOperation[];
 }

@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { ExecutionApi } from '../api/execution.api';
-import { CollectionTree, ExecutionResult, isExecutionError } from '../models';
+import { CollectionTree, ExecutionResult, WsdlInspection, isExecutionError } from '../models';
 import { NotificationService } from '../notifications/notification.service';
 import {
   RequestDraft,
@@ -28,6 +28,8 @@ export interface EditorTab {
   draft: RequestDraft;
   running: boolean;
   result: ExecutionResult | null;
+  /** Lo último que se leyó del WSDL de una petición SOAP; no se guarda. */
+  wsdl: WsdlInspection | null;
 }
 
 /** Pestañas del editor. Sigue a la petición seleccionada en el árbol y la mantiene en sincronía con ella. */
@@ -91,6 +93,7 @@ export class TabsStore {
           draft,
           running: false,
           result: null,
+          wsdl: null,
         },
       ]);
     }
@@ -114,7 +117,7 @@ export class TabsStore {
   /** Guarda el borrador. Si no hay nada que guardar, no hace nada. */
   save(id: string): Observable<void> {
     const tab = this.byId(id);
-    if (!tab || tab.draft.protocol !== 'REST') return of(undefined);
+    if (!tab) return of(undefined);
 
     const saved = tab.draft;
     return this.collections.updateRequest(tab.collectionId, id, toSaveDto(saved)).pipe(
@@ -122,6 +125,11 @@ export class TabsStore {
         this.patch(id, (current) => ({ ...current, baseline: saved }));
       }),
     );
+  }
+
+  /** Recuerda las operaciones leídas del WSDL de una petición. */
+  setWsdl(id: string, wsdl: WsdlInspection | null): void {
+    this.patch(id, (tab) => ({ ...tab, wsdl }));
   }
 
   send(id: string): void {

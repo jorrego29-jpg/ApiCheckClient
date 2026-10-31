@@ -100,6 +100,8 @@ export function describeBody(data: unknown, headers?: Record<string, unknown> | 
       text = data;
       if (contentType.includes('xml') || trimmed.startsWith('<?xml') || /^<[\w:-]/.test(trimmed)) {
         language = 'xml';
+        // Los servicios SOAP suelen contestar en una sola línea: se sangra para poder leerlo.
+        if (!trimmed.includes('\n') && trimmed.length <= LARGE_BODY) text = prettyXml(trimmed);
       }
     }
   } else if (typeof data === 'object') {
@@ -110,6 +112,44 @@ export function describeBody(data: unknown, headers?: Record<string, unknown> | 
   }
 
   return { text, language, empty: text.length === 0, large: text.length > LARGE_BODY };
+}
+
+const XML_TOKEN =
+  /<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<(?:"[^"]*"|'[^']*'|[^>"'])*>|[^<]+/g;
+
+/** Sangra un XML escrito en una sola línea. Solo cambia el espacio entre etiquetas. */
+export function prettyXml(xml: string): string {
+  const tokens = xml.trim().match(XML_TOKEN);
+  if (!tokens) return xml;
+
+  const lines: string[] = [];
+  let depth = 0;
+  const line = (text: string) => lines.push('  '.repeat(depth) + text);
+  const isOpening = (token: string) =>
+    token.startsWith('<') && !/^<[/?!]/.test(token) && !token.endsWith('/>');
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (!token.startsWith('<')) {
+      if (token.trim()) line(token.trim());
+    } else if (token.startsWith('</')) {
+      depth = Math.max(0, depth - 1);
+      line(token);
+    } else if (isOpening(token)) {
+      const text = tokens[i + 1];
+      const close = tokens[i + 2];
+      if (text !== undefined && !text.startsWith('<') && close?.startsWith('</')) {
+        line(token + text.trim() + close); // <a>valor</a> queda en una línea
+        i += 2;
+      } else {
+        line(token);
+        depth++;
+      }
+    } else {
+      line(token); // declaración, comentario, CDATA o etiqueta vacía
+    }
+  }
+  return lines.join('\n');
 }
 
 function tryParseJson(text: string): { ok: true; value: unknown } | { ok: false } {

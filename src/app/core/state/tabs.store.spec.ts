@@ -280,6 +280,80 @@ describe('TabsStore', () => {
     expect(tabs.active()?.running).toBe(false);
   });
 
+  describe('SOAP requests', () => {
+    const wsdl = {
+      wsdlUrl: 'https://svc.test/calc?WSDL',
+      services: ['Calculator'],
+      methods: [],
+      operations: [],
+    };
+
+    /** Convierte en SOAP el borrador de r1, sin tocar lo guardado. */
+    function asSoap(content = '<soap:Envelope/>'): void {
+      select('r1');
+      tabs.edit('r1', (draft) => ({
+        ...draft,
+        protocol: 'SOAP',
+        url: 'https://svc.test/calc',
+        soapAction: 'urn:Add',
+        wsdlUrl: 'https://svc.test/calc?WSDL',
+        body: { type: 'xml', content },
+      }));
+    }
+
+    it('sends the envelope as SOAP, without going through the WSDL', () => {
+      asSoap();
+
+      tabs.send('r1');
+
+      const run = http.expectOne({ method: 'POST', url: '/api/execution/run' });
+      expect(run.request.body).toEqual({
+        requestId: 'r1',
+        protocol: 'SOAP',
+        url: 'https://svc.test/calc',
+        body: '<soap:Envelope/>',
+        soapAction: 'urn:Add',
+        workspaceId: 'w1',
+      });
+      run.flush(okResult);
+    });
+
+    it('does not send without an envelope', () => {
+      asSoap('');
+
+      tabs.send('r1');
+
+      http.expectNone('/api/execution/run');
+      expect(tabs.active()?.running).toBe(false);
+    });
+
+    it('saves SOAPAction and WSDL along with the envelope', () => {
+      asSoap();
+
+      tabs.save('r1').subscribe();
+
+      const put = http.expectOne({ method: 'PUT', url: '/api/collections/requests/r1' });
+      expect(put.request.body).toMatchObject({
+        protocol: 'SOAP',
+        method: null,
+        soapAction: 'urn:Add',
+        wsdlUrl: 'https://svc.test/calc?WSDL',
+        body: { type: 'xml', content: '<soap:Envelope/>' },
+      });
+      put.flush({});
+      http.expectOne('/api/collections/c1/tree').flush(tree([request('r1'), request('r2')]));
+    });
+
+    it('remembers what was read from the WSDL without counting it as a change', () => {
+      select('r1');
+
+      tabs.setWsdl('r1', wsdl);
+
+      expect(tabs.active()?.wsdl).toEqual(wsdl);
+      expect(tabs.dirtyIds().size).toBe(0);
+    });
+  });
+
   describe('with an environment', () => {
     const dev: Environment = {
       id: 'e1',

@@ -362,3 +362,85 @@ describe('toKeyValues', () => {
     expect(toKeyValues([{ key: 'a', value: 'b', enabled: false }])).toEqual([row('a', 'b', false)]);
   });
 });
+
+describe('SOAP drafts', () => {
+  const envelope = '<soap:Envelope><soap:Body/></soap:Envelope>';
+  const soap = (overrides: Partial<RequestDraft> = {}) =>
+    draft({
+      protocol: 'SOAP',
+      url: 'https://svc.test/calc.asmx?op=Add',
+      body: { type: 'xml', content: envelope },
+      soapAction: 'urn:Add',
+      wsdlUrl: 'https://svc.test/calc.asmx?WSDL',
+      ...overrides,
+    });
+
+  it('can be sent with a URL and an envelope, whatever the HTTP method says', () => {
+    expect(canSend(soap())).toBe(true);
+    expect(canSend(soap({ method: 'OPTIONS' }))).toBe(true);
+    expect(canSend(soap({ url: ' ' }))).toBe(false);
+    expect(canSend(soap({ body: EMPTY_BODY }))).toBe(false);
+    expect(canSend(soap({ body: { type: 'xml', content: '  \n' } }))).toBe(false);
+  });
+
+  it('keeps the endpoint as typed instead of splitting its query into params', () => {
+    const edited = withUrl(soap({ params: [] }), 'https://svc.test/calc.asmx?op=Sub');
+
+    expect(edited.url).toBe('https://svc.test/calc.asmx?op=Sub');
+    expect(edited.params).toEqual([]);
+  });
+
+  it('is saved without HTTP method or params, but with SOAPAction and WSDL', () => {
+    const dto = toSaveDto(soap({ headers: [row('X-Trace', '1')] }));
+
+    expect(dto).toMatchObject({
+      protocol: 'SOAP',
+      method: null,
+      queryParams: [],
+      url: 'https://svc.test/calc.asmx?op=Add',
+      headers: [row('X-Trace', '1')],
+      body: { type: 'xml', content: envelope },
+      soapAction: 'urn:Add',
+      wsdlUrl: 'https://svc.test/calc.asmx?WSDL',
+    });
+  });
+
+  it('does not add SOAP fields to the save of a REST request', () => {
+    expect(toSaveDto(draft())).not.toHaveProperty('soapAction');
+    expect(toSaveDto(draft())).not.toHaveProperty('wsdlUrl');
+  });
+
+  it('is sent as the envelope itself, never through the WSDL', () => {
+    const dto = toExecutionDto(soap(), { requestId: 'r1', workspaceId: 'w1', environmentId: 'e1' });
+
+    expect(dto).toEqual({
+      requestId: 'r1',
+      protocol: 'SOAP',
+      url: 'https://svc.test/calc.asmx?op=Add',
+      body: envelope,
+      soapAction: 'urn:Add',
+      workspaceId: 'w1',
+      environmentId: 'e1',
+    });
+    expect(dto).not.toHaveProperty('wsdlUrl');
+    expect(dto).not.toHaveProperty('method');
+  });
+
+  it('leaves out an empty SOAPAction and adds the scheme to the endpoint', () => {
+    const dto = toExecutionDto(soap({ soapAction: '  ', url: 'svc.test/calc.asmx' }));
+
+    expect(dto.soapAction).toBeUndefined();
+    expect(dto.url).toBe('http://svc.test/calc.asmx');
+  });
+
+  it('carries the headers and the Authorization of the Auth tab', () => {
+    const dto = toExecutionDto(
+      soap({
+        headers: [row('X-Trace', '1')],
+        auth: { type: 'bearer', config: { token: 'abc' } },
+      }),
+    );
+
+    expect(dto.headers).toEqual({ 'X-Trace': '1', Authorization: 'Bearer abc' });
+  });
+});
