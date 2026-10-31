@@ -4,6 +4,7 @@ import { HistoryDetail, HistoryEntry } from '../models';
 import { API_URL } from './api-url.token';
 
 export interface HistoryQuery {
+  workspaceId?: string; // solo las ejecuciones de peticiones de ese workspace
   requestId?: string;
   limit?: number; // el backend usa 50 por defecto y 200 como máximo
 }
@@ -15,6 +16,7 @@ export class HistoryApi {
 
   list(query: HistoryQuery = {}) {
     let params = new HttpParams();
+    if (query.workspaceId) params = params.set('workspaceId', query.workspaceId);
     if (query.requestId) params = params.set('requestId', query.requestId);
     if (query.limit !== undefined) params = params.set('limit', query.limit);
     return this.http.get<HistoryEntry[]>(this.baseUrl, { params });

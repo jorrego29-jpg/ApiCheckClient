@@ -96,6 +96,7 @@ describe('Shell', () => {
     // Con un workspace activo, el árbol pide sus colecciones y el selector sus entornos.
     http.expectOne((req) => req.url === '/api/collections').flush([]);
     http.expectOne((req) => req.url === '/api/environments').flush([]);
+    http.expectOne((req) => req.url === '/api/history').flush([]);
     await fixture.whenStable();
     expect(root(fixture).textContent).toContain('aún no tiene colecciones');
   });

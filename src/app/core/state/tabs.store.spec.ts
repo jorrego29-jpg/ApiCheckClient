@@ -2,10 +2,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { MessageService } from 'primeng/api';
-import { CollectionTree, Environment, ExecutionResult, SavedRequest } from '../models';
+import {
+  CollectionTree,
+  Environment,
+  ExecutionResult,
+  HistoryDetail,
+  SavedRequest,
+} from '../models';
 import { withUrl } from '../requests/request-draft';
 import { CollectionsStore } from './collections.store';
 import { EnvironmentStore } from './environment.store';
+import { HistoryStore } from './history.store';
 import { TabsStore } from './tabs.store';
 import { ACTIVE_WORKSPACE_KEY, WorkspaceStore } from './workspace.store';
 
@@ -235,6 +242,64 @@ describe('TabsStore', () => {
 
     expect(tabs.active()?.running).toBe(false);
     expect(tabs.active()?.result).toEqual(okResult);
+  });
+
+  it('refreshes the history after a run when someone is watching it', () => {
+    const history = TestBed.inject(HistoryStore);
+    history.watch('w1');
+    http.expectOne((req) => req.url === '/api/history').flush([]);
+    select('r1');
+
+    tabs.send('r1');
+    http.expectOne({ method: 'POST', url: '/api/execution/run' }).flush(okResult);
+
+    http.expectOne((req) => req.url === '/api/history').flush([]);
+  });
+
+  describe('showing a run from the history', () => {
+    const detail = (overrides: Partial<HistoryDetail> = {}): HistoryDetail => ({
+      id: 'h1',
+      requestId: 'r2',
+      executedUrl: 'https://api.test/r2',
+      method: 'GET',
+      status: 404,
+      statusText: 'Not Found',
+      durationMs: 30,
+      sizeBytes: 0,
+      createdAt: '2026-10-30T12:00:00.000Z',
+      requestHeaders: {},
+      responseHeaders: {},
+      responseBody: '""',
+      ...overrides,
+    });
+
+    it('opens the request and shows what that run got, leaving the draft alone', () => {
+      select('r1');
+
+      expect(tabs.showHistory(detail())).toBe(true);
+
+      expect(tabs.activeId()).toBe('r2');
+      const tab = tabs.active();
+      expect(tab?.draft).toEqual(tab?.baseline);
+      expect(tab?.result?.response).toMatchObject({ status: 404, statusText: 'Not Found' });
+      expect(tab?.result?.request.url).toBe('https://api.test/r2');
+    });
+
+    it('replaces the response a tab already had', () => {
+      select('r1');
+      tabs.send('r1');
+      http.expectOne({ method: 'POST', url: '/api/execution/run' }).flush(okResult);
+
+      tabs.showHistory(detail({ requestId: 'r1', status: 500, statusText: 'Server Error' }));
+
+      expect(tabs.active()?.result?.response).toMatchObject({ status: 500 });
+    });
+
+    it('does nothing when the request no longer exists', () => {
+      expect(tabs.showHistory(detail({ requestId: 'gone' }))).toBe(false);
+      expect(tabs.showHistory(detail({ requestId: null }))).toBe(false);
+      expect(tabs.tabs()).toEqual([]);
+    });
   });
 
   it('does not send twice while a request is running', () => {

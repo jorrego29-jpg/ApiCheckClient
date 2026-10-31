@@ -1,7 +1,14 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { ExecutionApi } from '../api/execution.api';
-import { CollectionTree, ExecutionResult, WsdlInspection, isExecutionError } from '../models';
+import {
+  CollectionTree,
+  ExecutionResult,
+  HistoryDetail,
+  WsdlInspection,
+  isExecutionError,
+} from '../models';
+import { resultFromHistory } from '../history/history-result';
 import { NotificationService } from '../notifications/notification.service';
 import {
   RequestDraft,
@@ -14,6 +21,7 @@ import {
 import { interpolate } from '../variables/variables';
 import { CollectionsStore } from './collections.store';
 import { EnvironmentStore } from './environment.store';
+import { HistoryStore } from './history.store';
 import { findRequest } from './request-lookup';
 import { WorkspaceStore } from './workspace.store';
 
@@ -39,6 +47,7 @@ export class TabsStore {
   private readonly workspaces = inject(WorkspaceStore);
   private readonly environments = inject(EnvironmentStore);
   private readonly executionApi = inject(ExecutionApi);
+  private readonly history = inject(HistoryStore);
   private readonly notifications = inject(NotificationService);
 
   private readonly list = signal<EditorTab[]>([]);
@@ -151,6 +160,7 @@ export class TabsStore {
         next: (result) => {
           this.runs.delete(id);
           this.patch(id, (current) => ({ ...current, running: false, result }));
+          this.history.refresh();
           // Un fallo de red del destino llega como respuesta normal; aquí se avisa.
           if (isExecutionError(result.response)) this.notifications.error(result.response.message);
         },
@@ -161,6 +171,19 @@ export class TabsStore {
         },
       }),
     );
+  }
+
+  /**
+   * Abre la petición de una ejecución del historial y muestra en ella lo que se obtuvo entonces.
+   * El borrador no cambia: el historial no guarda el cuerpo enviado. Devuelve false si la petición ya no existe.
+   */
+  showHistory(detail: HistoryDetail): boolean {
+    const id = detail.requestId;
+    if (!id) return false;
+    this.open(id);
+    if (!this.byId(id)) return false;
+    this.patch(id, (tab) => ({ ...tab, result: resultFromHistory(detail) }));
+    return true;
   }
 
   cancel(id: string): void {
