@@ -19,16 +19,14 @@
         [value]="row.key"
         (input)="change($index, { key: text($event) })"
       />
-      <input
-        pInputText
-        class="cell"
-        data-field="value"
-        spellcheck="false"
-        autocomplete="off"
-        [attr.aria-label]="valuePlaceholder()"
+      <app-variable-input
+        class="value-cell"
+        dataField="value"
+        [label]="valuePlaceholder()"
         [placeholder]="valuePlaceholder()"
+        [highlight]="highlight()"
         [value]="row.value"
-        (input)="change($index, { value: text($event) })"
+        (valueChange)="change($index, { value: $event })"
       />
       <button
         type="button"

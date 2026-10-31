@@ -53,6 +53,8 @@ export function seedWorkspace(http: HttpTestingController, requests: SavedReques
     },
   ]);
   TestBed.tick();
+  // Al activarse el workspace el store de entornos también pide los suyos (aquí, ninguno).
+  http.match((req) => req.url === '/api/environments').forEach((req) => req.flush([]));
   http
     .expectOne((req) => req.url === '/api/collections')
     .flush([

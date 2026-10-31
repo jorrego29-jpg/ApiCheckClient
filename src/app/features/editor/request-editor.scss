@@ -18,12 +18,11 @@ app-request-editor {
   }
 
   .urlbar .url {
+    --vi-padding-x: 0.6rem;
+    --vi-padding-y: 0;
     flex: 1 1 220px;
     min-width: 0;
     height: 30px;
-    padding: 0 0.6rem;
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
   }
 
   .urlbar .p-button {

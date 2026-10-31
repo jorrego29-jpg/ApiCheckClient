@@ -1,0 +1,166 @@
+<p-dialog
+  header="Entornos y variables"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [closable]="false"
+  [closeOnEscape]="false"
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [style]="{ width: 'min(56rem, 96vw)' }"
+>
+  <div class="layout" (keydown.escape)="close()">
+    <nav class="list" aria-label="Entornos">
+      <button
+        type="button"
+        class="item"
+        [class.is-selected]="isGlobal()"
+        (click)="choose(globalKey)"
+      >
+        <i class="pi pi-globe" aria-hidden="true"></i>
+        <span class="name">Globales</span>
+        <span class="count">{{ globalCount() }}</span>
+      </button>
+
+      @for (environment of store.environments(); track environment.id) {
+        <button
+          type="button"
+          class="item"
+          [class.is-selected]="selectedKey() === environment.id"
+          (click)="choose(environment.id)"
+        >
+          @if (store.activeId() === environment.id) {
+            <i class="pi pi-check-circle is-active" title="Entorno activo" aria-label="activo"></i>
+          } @else {
+            <i class="pi pi-circle" aria-hidden="true"></i>
+          }
+          <span class="name">{{ environment.name }}</span>
+          <span class="count">{{ environment.variables.length }}</span>
+        </button>
+      } @empty {
+        <p class="empty">
+          Aún no hay entornos. Crea uno para tener valores distintos, por ejemplo en desarrollo y en
+          producción.
+        </p>
+      }
+
+      <p-button
+        class="new"
+        label="Nuevo entorno"
+        icon="pi pi-plus"
+        size="small"
+        severity="secondary"
+        [text]="true"
+        (onClick)="startCreate()"
+      />
+    </nav>
+
+    <section class="detail">
+      <header class="head">
+        <h3 class="title">{{ isGlobal() ? 'Globales' : (selected()?.name ?? '') }}</h3>
+
+        @if (!isGlobal() && selected(); as environment) {
+          <div class="tools">
+            @if (store.activeId() === environment.id) {
+              <p-button
+                label="Dejar de usar"
+                icon="pi pi-times-circle"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                (onClick)="store.select('')"
+              />
+            } @else {
+              <p-button
+                label="Usar este entorno"
+                icon="pi pi-check-circle"
+                size="small"
+                (onClick)="store.select(environment.id)"
+              />
+            }
+            <p-button
+              icon="pi pi-pencil"
+              size="small"
+              severity="secondary"
+              [text]="true"
+              ariaLabel="Renombrar entorno"
+              title="Renombrar"
+              (onClick)="startRename()"
+            />
+            <p-button
+              icon="pi pi-trash"
+              size="small"
+              severity="danger"
+              [text]="true"
+              ariaLabel="Eliminar entorno"
+              title="Eliminar"
+              (onClick)="remove()"
+            />
+          </div>
+        }
+      </header>
+
+      <p class="hint">{{ description() }}</p>
+
+      <div class="table">
+        <app-key-value-table
+          keyPlaceholder="Variable"
+          valuePlaceholder="Valor"
+          [highlight]="false"
+          [rows]="rows()"
+          (rowsChange)="edit($event)"
+        />
+      </div>
+
+      @if (invalid().length) {
+        <p class="warning" role="alert">
+          Usa solo letras, números, guion bajo, guion y punto en el nombre. No sirven:
+          {{ invalid().join(', ') }}
+        </p>
+      }
+      @if (unnamed() > 0) {
+        <p class="warning" role="alert">
+          Hay un valor sin nombre de variable. Ponle nombre o quita la fila con la ×: sin nombre no
+          se guarda.
+        </p>
+      }
+      @if (duplicated().length) {
+        <p class="warning" role="status">
+          Nombre repetido (se usará el último): {{ duplicated().join(', ') }}
+        </p>
+      }
+
+      <footer class="actions">
+        <p-button label="Cerrar" severity="secondary" [text]="true" (onClick)="close()" />
+        <span class="spacer"></span>
+        <p-button
+          label="Descartar"
+          severity="secondary"
+          [text]="true"
+          [disabled]="!dirty()"
+          (onClick)="discard()"
+        />
+        <p-button
+          label="Guardar"
+          icon="pi pi-save"
+          [disabled]="!canSave()"
+          [loading]="saving()"
+          (onClick)="save()"
+        />
+      </footer>
+    </section>
+  </div>
+</p-dialog>
+
+<app-name-dialog
+  [title]="naming() === 'rename' ? 'Renombrar entorno' : 'Nuevo entorno'"
+  label="Nombre del entorno"
+  [confirmLabel]="naming() === 'rename' ? 'Guardar' : 'Crear'"
+  [value]="naming() === 'rename' ? (selected()?.name ?? '') : ''"
+  [visible]="naming() !== null"
+  (visibleChange)="nameVisible($event)"
+  [busy]="working()"
+  (confirmed)="confirmName($event)"
+/>
+
+<p-confirmdialog appendTo="body" />

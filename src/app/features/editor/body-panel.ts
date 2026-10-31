@@ -4,6 +4,7 @@ import { Button } from 'primeng/button';
 import { SelectButton } from 'primeng/selectbutton';
 import { BodyType, RequestBody } from '../../core/models';
 import { NotificationService } from '../../core/notifications/notification.service';
+import { EnvironmentStore } from '../../core/state/environment.store';
 import { CodeEditor } from '../../shared/components/code-editor/code-editor';
 
 /** Pestaña Body: tipo (ninguno, JSON, XML) y el contenido en un editor con colores. */
@@ -19,6 +20,7 @@ export class BodyPanel {
   readonly bodyChange = output<RequestBody>();
 
   private readonly notifications = inject(NotificationService);
+  protected readonly environments = inject(EnvironmentStore);
 
   protected readonly types: { label: string; value: BodyType; disabled?: boolean }[] = [
     { label: 'Ninguno', value: 'none' },

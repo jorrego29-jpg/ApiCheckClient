@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  min-width: 0;
+  // Quien lo usa puede cambiar el relleno; la copia del texto lo toma de aquí también.
+  --vi-padding-x: 0.5rem;
+  --vi-padding-y: 0.3rem;
+}
+
+.wrap {
+  position: relative;
+  display: block;
+  height: 100%;
+  border-radius: var(--p-inputtext-border-radius, var(--radius));
+  // El campo es transparente para que se vea el fondo de las variables; el color de base va aquí.
+  background: var(--p-inputtext-background, transparent);
+}
+
+.input,
+.text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-ligatures: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+
+.input {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: var(--vi-padding-y) var(--vi-padding-end, var(--vi-padding-x)) var(--vi-padding-y)
+    var(--vi-padding-x);
+  background: transparent;
+}
+
+// La copia ocupa el interior del campo, dentro del borde de 1px.
+.mirror {
+  position: absolute;
+  inset: 1px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--vi-padding-end, var(--vi-padding-x)) 0 var(--vi-padding-x);
+  overflow: hidden;
+  border-radius: inherit;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+
+.text {
+  flex: none;
+  white-space: pre;
+}
+
+// Solo fondo y sombra: nada que mueva el texto ni un píxel.
+.var {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--cyan) 20%, transparent);
+  box-shadow: 0 0 0 1px var(--cyan-border);
+  color: transparent;
+
+  &.is-missing {
+    background: color-mix(in srgb, var(--amber) 22%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--amber) 55%, transparent);
+  }
+}

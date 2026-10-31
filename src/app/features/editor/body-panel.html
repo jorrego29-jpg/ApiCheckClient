@@ -32,6 +32,7 @@
         ariaLabel="Contenido del body"
         [language]="language()"
         [placeholderText]="hint()"
+        [variables]="environments.variables()"
         [value]="body().content"
         (valueChange)="setContent($event)"
       />

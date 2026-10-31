@@ -33,6 +33,8 @@ import {
   placeholder,
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
+import { VariableMap } from '../../../core/variables/variables';
+import { variableHighlight } from './variable-highlight';
 
 export type CodeLanguage = 'json' | 'xml' | 'text';
 
@@ -77,6 +79,15 @@ const theme = EditorView.theme(
     '.cm-panels input, .cm-panels button': {
       fontFamily: 'var(--font-sans)',
       fontSize: 'var(--text-sm)',
+    },
+    '.cm-var': {
+      borderRadius: '3px',
+      backgroundColor: 'color-mix(in srgb, var(--cyan) 20%, transparent)',
+      boxShadow: '0 0 0 1px var(--cyan-border)',
+    },
+    '.cm-var-missing': {
+      backgroundColor: 'color-mix(in srgb, var(--amber) 22%, transparent)',
+      boxShadow: '0 0 0 1px color-mix(in srgb, var(--amber) 55%, transparent)',
     },
     '.cm-searchMatch': { backgroundColor: 'var(--violet-glow)' },
     '.cm-searchMatch-selected': { backgroundColor: 'var(--cyan-glow)' },
@@ -142,6 +153,8 @@ export class CodeEditor {
   readonly lineWrap = input(false);
   readonly placeholderText = input('');
   readonly ariaLabel = input('Editor de código');
+  /** Si se da, las `{{variables}}` del texto se pintan según tengan valor o no. */
+  readonly variables = input<VariableMap | null>(null);
 
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('host');
   private view?: EditorView;
@@ -150,6 +163,7 @@ export class CodeEditor {
   private readonly editableSlot = new Compartment();
   private readonly wrapSlot = new Compartment();
   private readonly labelSlot = new Compartment();
+  private readonly variablesSlot = new Compartment();
 
   constructor() {
     afterNextRender(() => this.create());
@@ -169,6 +183,7 @@ export class CodeEditor {
       const editable = !this.readOnly();
       const wrap = this.lineWrap() ? EditorView.lineWrapping : [];
       const label = EditorView.contentAttributes.of({ 'aria-label': this.ariaLabel() });
+      const variables = this.variables();
       this.view?.dispatch({
         effects: [
           this.languageSlot.reconfigure(language),
@@ -178,6 +193,7 @@ export class CodeEditor {
           ]),
           this.wrapSlot.reconfigure(wrap),
           this.labelSlot.reconfigure(label),
+          this.variablesSlot.reconfigure(variables ? variableHighlight(variables) : []),
         ],
       });
     });
@@ -185,6 +201,7 @@ export class CodeEditor {
 
   private create(): void {
     const editable = !this.readOnly();
+    const variables = this.variables();
     this.view = new EditorView({
       parent: this.host().nativeElement,
       state: EditorState.create({
@@ -218,6 +235,7 @@ export class CodeEditor {
           ]),
           this.wrapSlot.of(this.lineWrap() ? EditorView.lineWrapping : []),
           this.labelSlot.of(EditorView.contentAttributes.of({ 'aria-label': this.ariaLabel() })),
+          this.variablesSlot.of(variables ? variableHighlight(variables) : []),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) this.value.set(update.state.doc.toString());
           }),

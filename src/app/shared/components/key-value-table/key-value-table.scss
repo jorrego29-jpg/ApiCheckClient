@@ -9,7 +9,8 @@
   gap: 6px;
   padding: 2px 0;
 
-  &.is-off .cell {
+  &.is-off .cell,
+  &.is-off .value-cell {
     opacity: 0.5;
   }
 
@@ -37,6 +38,12 @@
   padding: 0.3rem 0.5rem;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+  line-height: 1.4; // igual que el campo con variables, para que las filas midan lo mismo
+}
+
+.value-cell {
+  width: 100%;
+  min-width: 0;
 }
 
 .remove {

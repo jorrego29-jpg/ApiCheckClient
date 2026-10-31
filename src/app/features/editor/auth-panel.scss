@@ -16,10 +16,10 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
 
-  input {
-    width: 100%;
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
+  // Mismas medidas que el selector de tipo de arriba.
+  app-variable-input {
+    --vi-padding-x: 0.75rem;
+    --vi-padding-y: 0.5rem;
   }
 }
 
@@ -31,8 +31,9 @@
   position: relative;
   display: block;
 
-  input {
-    padding-right: 34px;
+  // Deja sitio al botón del ojo.
+  app-variable-input {
+    --vi-padding-end: 34px;
   }
 }
 

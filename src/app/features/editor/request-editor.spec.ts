@@ -42,7 +42,7 @@ describe('RequestEditor', () => {
   });
 
   const element = () => fixture.nativeElement as HTMLElement;
-  const urlInput = () => element().querySelector<HTMLInputElement>('input.url')!;
+  const urlInput = () => element().querySelector<HTMLInputElement>('app-variable-input.url input')!;
   const button = (text: string) =>
     Array.from(element().querySelectorAll<HTMLButtonElement>('button')).find((b) =>
       b.textContent?.includes(text),
@@ -54,6 +54,9 @@ describe('RequestEditor', () => {
     fixture = TestBed.createComponent(RequestEditor);
     seedWorkspace(http, [request]);
     collections.selectRequest(request.id);
+    TestBed.tick();
+    await fixture.whenStable();
+    // ngModel escribe el valor de los select en una microtarea; hace falta otra vuelta para verlo pintado.
     TestBed.tick();
     await fixture.whenStable();
   }

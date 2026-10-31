@@ -13,17 +13,13 @@
         [ngModel]="t.draft.method"
         (ngModelChange)="setMethod($event)"
       />
-      <input
-        pInputText
+      <app-variable-input
         class="url"
-        type="text"
-        spellcheck="false"
-        autocomplete="off"
-        aria-label="URL"
+        label="URL"
         placeholder="https://api.ejemplo.com/recurso"
         [value]="t.draft.url"
-        (input)="setUrl(text($event))"
-        (keydown.enter)="send()"
+        (valueChange)="setUrl($event)"
+        (enter)="send()"
       />
 
       @if (t.running) {

@@ -51,6 +51,13 @@ describe('Shell', () => {
     expect(element.querySelector('.response')).not.toBeNull();
   });
 
+  it('offers the workspace and environment selectors in the top bar', async () => {
+    const element = root(await boot());
+
+    expect(element.querySelector('.topbar app-workspace-switcher')).not.toBeNull();
+    expect(element.querySelector('.topbar app-environment-switcher')).not.toBeNull();
+  });
+
   it('shows the API as connected when the backend answers', async () => {
     const status = root(await boot()).querySelector('.api-status');
 
@@ -86,8 +93,9 @@ describe('Shell', () => {
     http.expectOne('/api/workspaces').flush([workspace]);
     await fixture.whenStable();
 
-    // Con un workspace activo, el árbol pide sus colecciones.
+    // Con un workspace activo, el árbol pide sus colecciones y el selector sus entornos.
     http.expectOne((req) => req.url === '/api/collections').flush([]);
+    http.expectOne((req) => req.url === '/api/environments').flush([]);
     await fixture.whenStable();
     expect(root(fixture).textContent).toContain('aún no tiene colecciones');
   });

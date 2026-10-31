@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { InputText } from 'primeng/inputtext';
 import { KeyValue } from '../../../core/models';
+import { VariableInput } from '../variable-input/variable-input';
 
 type Field = 'key' | 'value';
 
@@ -19,16 +20,18 @@ type Field = 'key' | 'value';
  */
 @Component({
   selector: 'app-key-value-table',
-  imports: [InputText],
+  imports: [InputText, VariableInput],
   templateUrl: './key-value-table.html',
   styleUrl: './key-value-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KeyValueTable {
-  readonly rows = input.required<readonly KeyValue[]>();
+export class KeyValueTable<T extends KeyValue = KeyValue> {
+  readonly rows = input.required<readonly T[]>();
   readonly keyPlaceholder = input('Clave');
   readonly valuePlaceholder = input('Valor');
-  readonly rowsChange = output<KeyValue[]>();
+  /** Pinta las {{variables}} de los valores. Se apaga donde no se sustituyen. */
+  readonly highlight = input(true);
+  readonly rowsChange = output<T[]>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
@@ -55,7 +58,8 @@ export class KeyValueTable {
     const index = this.rows().length;
     const row: KeyValue = { key: '', value: '', enabled: true, [field]: input.value };
     input.value = '';
-    this.rowsChange.emit([...this.rows(), row]);
+    // La fila nueva solo tiene lo de KeyValue; lo que añada quien usa la tabla (un id, por ejemplo) llega después.
+    this.rowsChange.emit([...this.rows(), row as T]);
 
     afterNextRender(
       () => {

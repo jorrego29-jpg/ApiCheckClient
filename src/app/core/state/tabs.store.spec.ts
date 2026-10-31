@@ -2,9 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { MessageService } from 'primeng/api';
-import { CollectionTree, ExecutionResult, SavedRequest } from '../models';
+import { CollectionTree, Environment, ExecutionResult, SavedRequest } from '../models';
 import { withUrl } from '../requests/request-draft';
 import { CollectionsStore } from './collections.store';
+import { EnvironmentStore } from './environment.store';
 import { TabsStore } from './tabs.store';
 import { ACTIVE_WORKSPACE_KEY, WorkspaceStore } from './workspace.store';
 
@@ -71,18 +72,17 @@ describe('TabsStore', () => {
     tabs = TestBed.inject(TabsStore);
 
     TestBed.inject(WorkspaceStore).load();
-    http
-      .expectOne('/api/workspaces')
-      .flush([
-        {
-          id: 'w1',
-          name: 'W1',
-          createdAt: '',
-          updatedAt: '',
-          _count: { collections: 1, environments: 0 },
-        },
-      ]);
+    http.expectOne('/api/workspaces').flush([
+      {
+        id: 'w1',
+        name: 'W1',
+        createdAt: '',
+        updatedAt: '',
+        _count: { collections: 1, environments: 0 },
+      },
+    ]);
     TestBed.tick();
+    http.match((req) => req.url === '/api/environments').forEach((req) => req.flush([]));
     http
       .expectOne((req) => req.url === '/api/collections')
       .flush([
@@ -278,5 +278,58 @@ describe('TabsStore', () => {
     tabs.send('r1');
 
     expect(tabs.active()?.running).toBe(false);
+  });
+
+  describe('with an environment', () => {
+    const dev: Environment = {
+      id: 'e1',
+      name: 'Dev',
+      isGlobal: false,
+      workspaceId: 'w1',
+      variables: [
+        { id: 'v1', key: 'user', value: 'ana', enabled: true, environmentId: 'e1' },
+        { id: 'v2', key: 'pass', value: 'p"w', enabled: true, environmentId: 'e1' },
+      ],
+    };
+
+    /** Crea el entorno "Dev" y lo deja elegido. */
+    function useDev(): void {
+      const environments = TestBed.inject(EnvironmentStore);
+      environments.create('Dev').subscribe();
+      http.expectOne({ method: 'POST', url: '/api/environments' }).flush(dev);
+      environments.select('e1');
+    }
+
+    it('sends the chosen environment along with the request', () => {
+      useDev();
+      select('r1');
+
+      tabs.send('r1');
+
+      const run = http.expectOne('/api/execution/run');
+      expect(run.request.body).toMatchObject({
+        requestId: 'r1',
+        environmentId: 'e1',
+        workspaceId: 'w1',
+      });
+      run.flush(okResult);
+    });
+
+    it('fills in the variables of Basic auth before encoding it, since the backend cannot', () => {
+      useDev();
+      select('r1');
+      tabs.edit('r1', (draft) => ({
+        ...draft,
+        auth: { type: 'basic', config: { username: '{{user}}', password: '{{pass}}' } },
+      }));
+
+      tabs.send('r1');
+
+      const run = http.expectOne('/api/execution/run');
+      expect(run.request.body).toMatchObject({
+        headers: { Authorization: `Basic ${btoa('ana:p"w')}` },
+      });
+      run.flush(okResult);
+    });
   });
 });

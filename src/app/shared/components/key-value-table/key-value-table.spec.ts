@@ -1,4 +1,7 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MessageService } from 'primeng/api';
 import { KeyValue } from '../../../core/models';
 import { KeyValueTable } from './key-value-table';
 
@@ -9,7 +12,7 @@ describe('KeyValueTable', () => {
   const rows = (): HTMLElement[] =>
     Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.row'));
   const cells = (row: HTMLElement) =>
-    Array.from(row.querySelectorAll<HTMLInputElement>('input.cell'));
+    Array.from(row.querySelectorAll<HTMLInputElement>('input.cell, app-variable-input input'));
 
   function type(input: HTMLInputElement, value: string): void {
     input.value = value;
@@ -22,7 +25,14 @@ describe('KeyValueTable', () => {
   }
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [KeyValueTable] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [KeyValueTable],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MessageService, useValue: { add: () => undefined } },
+      ],
+    }).compileComponents();
     fixture = TestBed.createComponent(KeyValueTable);
     emitted = [];
     fixture.componentInstance.rowsChange.subscribe((value) => emitted.push(value));

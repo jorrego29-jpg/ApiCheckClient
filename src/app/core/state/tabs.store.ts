@@ -11,7 +11,9 @@ import {
   toExecutionDto,
   toSaveDto,
 } from '../requests/request-draft';
+import { interpolate } from '../variables/variables';
 import { CollectionsStore } from './collections.store';
+import { EnvironmentStore } from './environment.store';
 import { findRequest } from './request-lookup';
 import { WorkspaceStore } from './workspace.store';
 
@@ -33,6 +35,7 @@ export interface EditorTab {
 export class TabsStore {
   private readonly collections = inject(CollectionsStore);
   private readonly workspaces = inject(WorkspaceStore);
+  private readonly environments = inject(EnvironmentStore);
   private readonly executionApi = inject(ExecutionApi);
   private readonly notifications = inject(NotificationService);
 
@@ -128,6 +131,9 @@ export class TabsStore {
     const dto = toExecutionDto(tab.draft, {
       requestId: id,
       workspaceId: this.workspaces.activeId() ?? undefined,
+      environmentId: this.environments.activeId() || undefined,
+      // El backend sustituye las {{variables}} de URL, headers y body, pero en Basic las recibe ya en base64.
+      resolve: (text) => interpolate(text, this.environments.variables()),
     });
 
     this.patch(id, (current) => ({ ...current, running: true }));

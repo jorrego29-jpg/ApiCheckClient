@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { finalize } from 'rxjs';
@@ -30,6 +29,7 @@ import {
 import { TabsStore } from '../../core/state/tabs.store';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { KeyValueTable } from '../../shared/components/key-value-table/key-value-table';
+import { VariableInput } from '../../shared/components/variable-input/variable-input';
 import { AuthPanel } from './auth-panel';
 import { BodyPanel } from './body-panel';
 import { TabsBar } from './tabs-bar';
@@ -45,7 +45,7 @@ const activeRows = (rows: readonly KeyValue[]) =>
   imports: [
     FormsModule,
     Button,
-    InputText,
+    VariableInput,
     Select,
     Tabs,
     TabList,
@@ -100,10 +100,6 @@ export class RequestEditor {
 
   protected setSection(value: string | number | undefined): void {
     if (typeof value === 'string') this.section.set(value as Section);
-  }
-
-  protected text(event: Event): string {
-    return (event.target as HTMLInputElement).value;
   }
 
   // --- Edición ---

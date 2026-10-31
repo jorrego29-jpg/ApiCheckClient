@@ -9,7 +9,6 @@ import {
   untracked,
 } from '@angular/core';
 import { PrimeTemplate } from 'primeng/api';
-import { Select } from 'primeng/select';
 import { Splitter } from 'primeng/splitter';
 import { ApiConnection, ApiStatus } from '../../core/state/api-status';
 import { CollectionsStore } from '../../core/state/collections.store';
@@ -17,6 +16,7 @@ import { TabsStore } from '../../core/state/tabs.store';
 import { RequestEditor } from '../../features/editor/request-editor';
 import { ResponseViewer } from '../../features/response/response-viewer';
 import { WorkspaceStore } from '../../core/state/workspace.store';
+import { EnvironmentSwitcher } from '../environment-switcher/environment-switcher';
 import { Sidebar } from '../sidebar/sidebar';
 import { WorkspaceSwitcher } from '../workspace-switcher/workspace-switcher';
 
@@ -47,9 +47,9 @@ const BP_DESKTOP = 1024;
   imports: [
     Splitter,
     PrimeTemplate,
-    Select,
     Sidebar,
     WorkspaceSwitcher,
+    EnvironmentSwitcher,
     RequestEditor,
     ResponseViewer,
   ],

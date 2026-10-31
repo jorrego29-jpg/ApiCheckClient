@@ -18,14 +18,12 @@
       <label class="field">
         <span>Token</span>
         <span class="secret">
-          <input
-            pInputText
-            autocomplete="off"
-            spellcheck="false"
+          <app-variable-input
+            label="Token"
             [placeholder]="tokenHint"
             [type]="reveal() ? 'text' : 'password'"
             [value]="auth().config?.token ?? ''"
-            (input)="setConfig({ token: text($event) })"
+            (valueChange)="setConfig({ token: $event })"
           />
           <button
             type="button"
@@ -50,23 +48,21 @@
     @case ('basic') {
       <label class="field">
         <span>Usuario</span>
-        <input
-          pInputText
-          autocomplete="off"
-          spellcheck="false"
+        <app-variable-input
+          label="Usuario"
           [value]="auth().config?.username ?? ''"
-          (input)="setConfig({ username: text($event) })"
+          (valueChange)="setConfig({ username: $event })"
         />
       </label>
       <label class="field">
         <span>Contraseña</span>
         <span class="secret">
-          <input
-            pInputText
+          <app-variable-input
+            label="Contraseña"
             autocomplete="new-password"
             [type]="reveal() ? 'text' : 'password'"
             [value]="auth().config?.password ?? ''"
-            (input)="setConfig({ password: text($event) })"
+            (valueChange)="setConfig({ password: $event })"
           />
           <button
             type="button"
