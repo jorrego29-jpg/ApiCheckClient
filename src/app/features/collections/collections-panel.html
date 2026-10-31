@@ -1,0 +1,96 @@
+<header class="head">
+  <h2 class="panel-title">Colecciones</h2>
+  <p-button
+    icon="pi pi-plus"
+    size="small"
+    severity="secondary"
+    [text]="true"
+    ariaLabel="Nueva colección"
+    title="Nueva colección"
+    [disabled]="!workspaces.activeId() || store.status() === 'error'"
+    (onClick)="newCollection()"
+  />
+</header>
+
+@switch (store.status()) {
+  @case ('idle') {
+    <p class="note">Crea o elige un workspace para ver sus colecciones.</p>
+  }
+  @case ('loading') {
+    <p class="note">Cargando colecciones…</p>
+  }
+  @case ('error') {
+    <p class="note">No se pudieron cargar las colecciones.</p>
+    <p-button
+      label="Reintentar"
+      icon="pi pi-refresh"
+      size="small"
+      severity="secondary"
+      [text]="true"
+      (onClick)="store.reload()"
+    />
+  }
+  @case ('ready') {
+    @if (nodes().length === 0) {
+      <p class="note">Este workspace aún no tiene colecciones. Crea la primera con el botón +.</p>
+    } @else {
+      <p-tree
+        styleClass="explorer"
+        ariaLabel="Colecciones"
+        selectionMode="single"
+        [value]="nodes()"
+        [selection]="selectedNode()"
+        (onNodeSelect)="select($event)"
+        (onNodeExpand)="setExpanded($event, true)"
+        (onNodeCollapse)="setExpanded($event, false)"
+      >
+        <ng-template let-node pTemplate="default">
+          <span class="node" [attr.data-kind]="node.data.kind">
+            @if (node.data.kind === 'request') {
+              <span class="badge" [attr.data-method]="node.data.badge">{{ node.data.badge }}</span>
+            } @else {
+              <i
+                class="pi node-icon"
+                [class.pi-box]="node.data.kind === 'collection'"
+                [class.pi-folder]="node.data.kind === 'folder'"
+                aria-hidden="true"
+              ></i>
+            }
+            <span class="label" [title]="node.label">{{ node.label }}</span>
+            <button
+              type="button"
+              class="more"
+              aria-label="Acciones"
+              title="Acciones"
+              (click)="openMenu($event, node)"
+            >
+              <i class="pi pi-ellipsis-h" aria-hidden="true"></i>
+            </button>
+          </span>
+        </ng-template>
+      </p-tree>
+    }
+  }
+}
+
+<p-menu #menu [popup]="true" appendTo="body" [model]="menuItems()" />
+
+@if (nameAction(); as action) {
+  <app-name-dialog
+    [title]="action.title"
+    [label]="action.label"
+    [confirmLabel]="action.confirmLabel"
+    [value]="action.value"
+    [busy]="saving()"
+    [(visible)]="nameVisible"
+    (confirmed)="confirmName($event)"
+  />
+}
+
+<app-request-dialog
+  [busy]="saving()"
+  [(visible)]="requestVisible"
+  (confirmed)="createRequest($event)"
+/>
+
+<p-confirmdialog appendTo="body" />

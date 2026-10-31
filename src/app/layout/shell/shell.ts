@@ -3,13 +3,19 @@ import {
   Component,
   HostListener,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { PrimeTemplate } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { Splitter } from 'primeng/splitter';
 import { ApiConnection, ApiStatus } from '../../core/state/api-status';
+import { CollectionsStore } from '../../core/state/collections.store';
+import { WorkspaceStore } from '../../core/state/workspace.store';
+import { Sidebar } from '../sidebar/sidebar';
+import { WorkspaceSwitcher } from '../workspace-switcher/workspace-switcher';
 
 const STATUS_LABEL: Record<ApiConnection, string> = {
   checking: 'Conectando…',
@@ -35,13 +41,15 @@ const BP_DESKTOP = 1024;
  */
 @Component({
   selector: 'app-shell',
-  imports: [Splitter, PrimeTemplate, Select],
+  imports: [Splitter, PrimeTemplate, Select, Sidebar, WorkspaceSwitcher],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Shell {
   protected readonly apiStatus = inject(ApiStatus);
+  private readonly workspaces = inject(WorkspaceStore);
+  private readonly collections = inject(CollectionsStore);
 
   protected readonly statusLabel = computed(() => STATUS_LABEL[this.apiStatus.state()]);
   protected readonly statusHint  = computed(() => STATUS_HINT[this.apiStatus.state()]);
@@ -78,7 +86,20 @@ export class Shell {
     this.mobileTab.set(tab);
   }
 
+  /** Vuelve a comprobar la conexión y, si los workspaces no llegaron, a pedirlos. */
+  recheck(): void {
+    this.apiStatus.check();
+    if (this.workspaces.status() === 'error') this.workspaces.load();
+  }
+
   constructor() {
     this.apiStatus.check();
+    this.workspaces.load();
+
+    // En tablet y móvil el árbol está en un drawer: al elegir una petición se cierra para dejar ver el editor.
+    effect(() => {
+      this.collections.selectedRequestId();
+      untracked(() => this.closeSidebar());
+    });
   }
 }

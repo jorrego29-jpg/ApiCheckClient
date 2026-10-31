@@ -27,14 +27,7 @@
 
   <!-- Workspace / Entorno selectors (ocultos en mobile) -->
   <div class="controls">
-    <p-select
-      class="control"
-      [options]="[]"
-      [disabled]="true"
-      placeholder="Sin workspace"
-      ariaLabel="Workspace"
-      title="Se habilita en la fase 2"
-    />
+    <app-workspace-switcher />
     <p-select
       class="control"
       [options]="[]"
@@ -51,7 +44,7 @@
     class="api-status"
     [attr.data-state]="apiStatus.state()"
     [title]="statusHint()"
-    (click)="apiStatus.check()"
+    (click)="recheck()"
   >
     <span class="dot" aria-hidden="true"></span>
     <span class="status-label">{{ statusLabel() }}</span>
@@ -76,14 +69,7 @@
       <!-- Sidebar: Collections + History -->
       <ng-template pTemplate>
         <aside class="sidebar" aria-label="Colecciones e historial">
-          <section class="panel">
-            <h2>Colecciones</h2>
-            <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
-          </section>
-          <section class="panel">
-            <h2>Historial</h2>
-            <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
-          </section>
+          <app-sidebar />
         </aside>
       </ng-template>
 
@@ -145,14 +131,7 @@
           </svg>
         </button>
       </div>
-      <section class="panel">
-        <h2>Colecciones</h2>
-        <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
-      </section>
-      <section class="panel">
-        <h2>Historial</h2>
-        <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
-      </section>
+      <app-sidebar />
     </aside>
 
     <!-- Editor full-width: vertical splitter -->
@@ -211,14 +190,7 @@
           </svg>
         </button>
       </div>
-      <section class="panel">
-        <h2>Colecciones</h2>
-        <p class="empty">Aquí aparecerá el árbol de colecciones, carpetas y peticiones.</p>
-      </section>
-      <section class="panel">
-        <h2>Historial</h2>
-        <p class="empty">Aquí aparecerán las últimas ejecuciones.</p>
-      </section>
+      <app-sidebar />
     </aside>
 
     <!-- Tab bar -->

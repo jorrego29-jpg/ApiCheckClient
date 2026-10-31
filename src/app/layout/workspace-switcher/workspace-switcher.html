@@ -1,0 +1,33 @@
+<p-select
+  class="select"
+  optionLabel="name"
+  optionValue="id"
+  appendTo="body"
+  ariaLabel="Workspace"
+  emptyMessage="Aún no hay workspaces"
+  [options]="store.workspaces()"
+  [ngModel]="store.activeId()"
+  (ngModelChange)="store.select($event)"
+  [placeholder]="placeholder()"
+  [loading]="store.status() === 'loading'"
+  [disabled]="store.status() === 'error'"
+/>
+<p-button
+  icon="pi pi-plus"
+  severity="secondary"
+  size="small"
+  [text]="true"
+  ariaLabel="Nuevo workspace"
+  title="Nuevo workspace"
+  [disabled]="store.status() === 'error'"
+  (onClick)="creating.set(true)"
+/>
+
+<app-name-dialog
+  title="Nuevo workspace"
+  label="Nombre del workspace"
+  confirmLabel="Crear"
+  [(visible)]="creating"
+  [busy]="saving()"
+  (confirmed)="create($event)"
+/>

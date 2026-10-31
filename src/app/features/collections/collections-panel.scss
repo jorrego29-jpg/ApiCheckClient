@@ -1,0 +1,128 @@
+app-collections-panel {
+  display: block;
+
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    .panel-title {
+      margin-bottom: 0;
+    }
+  }
+
+  .note {
+    padding: 4px 0 8px;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  // ── p-tree ──────────────────────────────────────────────────────
+  .p-tree.explorer {
+    --p-tree-node-color: var(--text);
+    --p-tree-node-hover-background: var(--surface-3);
+    --p-tree-node-hover-color: var(--text);
+    --p-tree-node-selected-background: var(--cyan-wash);
+    --p-tree-node-selected-color: var(--cyan);
+    --p-tree-node-toggle-button-color: var(--text-muted);
+    --p-tree-node-toggle-button-hover-color: var(--cyan);
+
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-md);
+  }
+
+  .node-icon {
+    flex: none;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .badge {
+    flex: none;
+    min-width: 38px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: left;
+    color: var(--text-muted);
+
+    &[data-method='GET'] {
+      color: var(--cyan);
+    }
+    &[data-method='POST'] {
+      color: var(--emerald);
+    }
+    &[data-method='PUT'] {
+      color: var(--amber);
+    }
+    &[data-method='PATCH'] {
+      color: var(--purple);
+    }
+    &[data-method='DELETE'] {
+      color: var(--crimson);
+    }
+    &[data-method='SOAP'] {
+      color: color-mix(in srgb, var(--violet) 55%, white);
+    }
+  }
+
+  .more {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    opacity: 0;
+
+    &:hover {
+      color: var(--cyan);
+      background: var(--surface-2);
+    }
+
+    // En pantallas táctiles no hay hover: el botón se muestra siempre.
+    @media (hover: none) {
+      opacity: 1;
+    }
+  }
+
+  .p-tree-node-content:hover .more,
+  .p-tree-node-content:focus-within .more,
+  .p-tree-node-content.p-tree-node-selected .more,
+  .more:focus-visible {
+    opacity: 1;
+  }
+}
+
+// El menú contextual se monta en <body>, fuera del componente.
+.p-menu .menu-danger {
+  .p-menu-item-label,
+  .p-menu-item-icon {
+    color: var(--danger);
+  }
+}

@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 10px 12px;
+
+  & + & {
+    border-top: 1px solid var(--border);
+  }
+}
+
+// El selector de workspace vive en la barra superior salvo en móvil (<768px).
+.panel--workspace {
+  display: none;
+
+  @media (max-width: 767px) {
+    display: block;
+  }
+}
+
+.note {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
