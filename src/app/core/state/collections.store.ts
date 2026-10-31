@@ -1,15 +1,10 @@
 import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { EMPTY, Observable, Subscription, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { CollectionsApi } from '../api/collections.api';
-import {
-  CollectionTree,
-  CreateFolderDto,
-  CreateRequestDto,
-  FolderNode,
-  SavedRequest,
-} from '../models';
+import { CollectionTree, CreateFolderDto, CreateRequestDto, UpdateRequestDto } from '../models';
 import { NotificationService } from '../notifications/notification.service';
 import { LoadStatus } from './load-status';
+import { findRequest } from './request-lookup';
 import { WorkspaceStore } from './workspace.store';
 
 /**
@@ -41,8 +36,9 @@ export class CollectionsStore {
     });
   }
 
+  /** Vuelve a pedir lo del workspace activo; la petición seleccionada se conserva si sigue existiendo. */
   reload(): void {
-    this.loadWorkspace(this.workspaces.activeId());
+    this.loadWorkspace(this.workspaces.activeId(), false);
   }
 
   selectRequest(id: string | null): void {
@@ -109,6 +105,14 @@ export class CollectionsStore {
     );
   }
 
+  /** Guarda los cambios de una petición (el editor) y refresca su árbol. */
+  updateRequest(collectionId: string, id: string, dto: UpdateRequestDto): Observable<void> {
+    return this.api.updateRequest(id, dto).pipe(
+      switchMap(() => this.refresh(collectionId)),
+      this.done('Petición guardada'),
+    );
+  }
+
   renameRequest(collectionId: string, id: string, name: string): Observable<void> {
     return this.api.updateRequest(id, { name }).pipe(
       switchMap(() => this.refresh(collectionId)),
@@ -124,9 +128,9 @@ export class CollectionsStore {
   }
 
   // --- Internos ---
-  private loadWorkspace(workspaceId: string | null): void {
+  private loadWorkspace(workspaceId: string | null, resetSelection = true): void {
     this.inflight?.unsubscribe();
-    this.selected.set(null);
+    if (resetSelection) this.selected.set(null);
 
     if (!workspaceId) {
       this.state.set([]);
@@ -152,6 +156,7 @@ export class CollectionsStore {
         next: (trees) => {
           this.state.set(trees);
           this.loadStatus.set('ready');
+          this.dropSelectionIfMissing();
         },
         error: () => {
           this.state.set([]);
@@ -173,7 +178,7 @@ export class CollectionsStore {
 
   private dropSelectionIfMissing(): void {
     const id = this.selected();
-    if (id && !this.state().some((tree) => containsRequest(tree, id))) this.selected.set(null);
+    if (id && !findRequest(this.state(), id)) this.selected.set(null);
   }
 
   private done(message: string) {
@@ -183,15 +188,4 @@ export class CollectionsStore {
         map(() => undefined),
       );
   }
-}
-
-function containsRequest(tree: CollectionTree, id: string): boolean {
-  return tree.requests.some((r) => r.id === id) || tree.folders.some((f) => folderHas(f, id));
-}
-
-function folderHas(folder: FolderNode, id: string): boolean {
-  return (
-    folder.requests.some((request: SavedRequest) => request.id === id) ||
-    folder.children.some((child) => folderHas(child, id))
-  );
 }

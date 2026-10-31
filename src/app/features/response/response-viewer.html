@@ -1,0 +1,124 @@
+@let t = tab();
+
+@if (!t) {
+  <app-empty-state>Envía una petición para ver aquí la respuesta.</app-empty-state>
+} @else if (t.running) {
+  <div class="center">
+    <p-progress-spinner strokeWidth="4" ariaLabel="Enviando" styleClass="spinner" />
+    <p>Enviando petición…</p>
+  </div>
+} @else if (view(); as v) {
+  @if (v.kind === 'error') {
+    <div class="failure" role="alert">
+      <h3>
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i> No se pudo completar la
+        petición
+      </h3>
+      <p class="failure-message">{{ v.message }}</p>
+      <p class="failure-hint">
+        El destino no respondió (host inexistente, conexión rechazada, tiempo agotado…). Tardó
+        {{ formatDuration(v.timeMs) }}.
+      </p>
+      <h4 class="failure-sent">Petición enviada</h4>
+      <app-sent-request [sent]="v.sent" />
+    </div>
+  } @else {
+    <div class="summary">
+      <span class="status" [attr.data-kind]="v.statusKind">{{ v.status }} {{ v.statusText }}</span>
+      <span class="metric"
+        ><i class="pi pi-clock" aria-hidden="true"></i> {{ formatDuration(v.timeMs) }}</span
+      >
+      <span class="metric"
+        ><i class="pi pi-database" aria-hidden="true"></i> {{ formatBytes(v.sizeBytes) }}</span
+      >
+    </div>
+
+    <p-tabs class="sections" [value]="section()" (valueChange)="setSection($event)">
+      <p-tablist>
+        <p-tab value="body">Cuerpo</p-tab>
+        <p-tab value="headers">
+          Headers
+          <span class="count">{{ v.headers.length }}</span>
+        </p-tab>
+        <p-tab value="sent">Petición enviada</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="body">
+          @if (section() === 'body') {
+            <div class="body">
+              @if (v.body.empty) {
+                <p class="note">La respuesta no tiene cuerpo.</p>
+              } @else {
+                <div class="toolbar">
+                  <p-button
+                    icon="pi pi-copy"
+                    size="small"
+                    severity="secondary"
+                    [text]="true"
+                    label="Copiar"
+                    (onClick)="copy(v.body)"
+                  />
+                  <p-button
+                    icon="pi pi-download"
+                    size="small"
+                    severity="secondary"
+                    [text]="true"
+                    label="Descargar"
+                    (onClick)="download(v.body)"
+                  />
+                  @if (!v.body.large) {
+                    <p-button
+                      icon="pi pi-align-justify"
+                      size="small"
+                      severity="secondary"
+                      [text]="true"
+                      [label]="wrap() ? 'Sin ajuste de línea' : 'Ajustar líneas'"
+                      (onClick)="wrap.set(!wrap())"
+                    />
+                  }
+                </div>
+
+                @if (v.body.large) {
+                  <p class="note">
+                    Respuesta muy grande: se muestran solo los primeros 100.000 caracteres, como
+                    texto. Descárgala para verla completa.
+                  </p>
+                  <pre class="raw">{{ preview(v.body) }}</pre>
+                } @else {
+                  <div class="editor">
+                    <app-code-editor
+                      ariaLabel="Cuerpo de la respuesta"
+                      [readOnly]="true"
+                      [lineWrap]="wrap()"
+                      [language]="v.body.language"
+                      [value]="v.body.text"
+                    />
+                  </div>
+                }
+              }
+            </div>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="headers">
+          @if (section() === 'headers') {
+            @if (v.headers.length === 0) {
+              <p class="note">La respuesta no trae cabeceras.</p>
+            } @else {
+              <app-header-list [rows]="v.headers" />
+            }
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="sent">
+          @if (section() === 'sent') {
+            <app-sent-request [sent]="v.sent" />
+          }
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  }
+} @else {
+  <app-empty-state>Envía una petición para ver aquí la respuesta.</app-empty-state>
+}

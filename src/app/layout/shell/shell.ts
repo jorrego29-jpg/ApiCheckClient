@@ -13,6 +13,9 @@ import { Select } from 'primeng/select';
 import { Splitter } from 'primeng/splitter';
 import { ApiConnection, ApiStatus } from '../../core/state/api-status';
 import { CollectionsStore } from '../../core/state/collections.store';
+import { TabsStore } from '../../core/state/tabs.store';
+import { RequestEditor } from '../../features/editor/request-editor';
+import { ResponseViewer } from '../../features/response/response-viewer';
 import { WorkspaceStore } from '../../core/state/workspace.store';
 import { Sidebar } from '../sidebar/sidebar';
 import { WorkspaceSwitcher } from '../workspace-switcher/workspace-switcher';
@@ -41,7 +44,15 @@ const BP_DESKTOP = 1024;
  */
 @Component({
   selector: 'app-shell',
-  imports: [Splitter, PrimeTemplate, Select, Sidebar, WorkspaceSwitcher],
+  imports: [
+    Splitter,
+    PrimeTemplate,
+    Select,
+    Sidebar,
+    WorkspaceSwitcher,
+    RequestEditor,
+    ResponseViewer,
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +61,8 @@ export class Shell {
   protected readonly apiStatus = inject(ApiStatus);
   private readonly workspaces = inject(WorkspaceStore);
   private readonly collections = inject(CollectionsStore);
+  // Se instancia aquí para que escuche la selección del árbol y abra las pestañas.
+  private readonly tabs = inject(TabsStore);
 
   protected readonly statusLabel = computed(() => STATUS_LABEL[this.apiStatus.state()]);
   protected readonly statusHint  = computed(() => STATUS_HINT[this.apiStatus.state()]);
@@ -99,7 +112,18 @@ export class Shell {
     // En tablet y móvil el árbol está en un drawer: al elegir una petición se cierra para dejar ver el editor.
     effect(() => {
       this.collections.selectedRequestId();
-      untracked(() => this.closeSidebar());
+      untracked(() => {
+        this.closeSidebar();
+        this.mobileTab.set('builder');
+      });
+    });
+
+    // En móvil, al enviar se pasa a ver la respuesta.
+    effect(() => {
+      const running = this.tabs.active()?.running;
+      untracked(() => {
+        if (running && this.isMobile()) this.mobileTab.set('output');
+      });
     });
   }
 }

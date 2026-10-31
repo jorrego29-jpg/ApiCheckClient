@@ -459,3 +459,12 @@ $drawer-width-mobile: 85vw;
     box-shadow: 0 0 12px var(--cyan-glow);
   }
 }
+
+// ══════════════════════════════════════════════════════════════════
+//  EDITOR Y VISOR: ocupan todo el panel (traen su propio relleno)
+// ══════════════════════════════════════════════════════════════════
+.request.request--flush,
+.response.response--flush {
+  padding: 0;
+  overflow: hidden;
+}

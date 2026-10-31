@@ -86,13 +86,13 @@
             [gutterSize]="4"
           >
             <ng-template pTemplate>
-              <section class="request" aria-label="Petición">
-                <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+              <section class="request request--flush" aria-label="Petición">
+                <app-request-editor />
               </section>
             </ng-template>
             <ng-template pTemplate>
-              <section class="response" aria-label="Respuesta">
-                <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+              <section class="response response--flush" aria-label="Respuesta">
+                <app-response-viewer />
               </section>
             </ng-template>
           </p-splitter>
@@ -146,13 +146,13 @@
         [gutterSize]="4"
       >
         <ng-template pTemplate>
-          <section class="request" aria-label="Petición">
-            <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+          <section class="request request--flush" aria-label="Petición">
+            <app-request-editor />
           </section>
         </ng-template>
         <ng-template pTemplate>
-          <section class="response" aria-label="Respuesta">
-            <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+          <section class="response response--flush" aria-label="Respuesta">
+            <app-response-viewer />
           </section>
         </ng-template>
       </p-splitter>
@@ -229,13 +229,13 @@
     <!-- Tab content -->
     <main class="mobile-content">
       @if (mobileTab() === 'builder') {
-        <section class="request request--mobile" role="tabpanel" aria-label="Constructor de petición">
-          <p class="empty">Selecciona una petición del árbol o crea una nueva para empezar.</p>
+        <section class="request request--mobile request--flush" role="tabpanel" aria-label="Constructor de petición">
+          <app-request-editor />
         </section>
       }
       @if (mobileTab() === 'output') {
-        <section class="response response--mobile" role="tabpanel" aria-label="Respuesta">
-          <p class="empty">Envía una petición para ver aquí la respuesta.</p>
+        <section class="response response--mobile response--flush" role="tabpanel" aria-label="Respuesta">
+          <app-response-viewer />
         </section>
       }
     </main>

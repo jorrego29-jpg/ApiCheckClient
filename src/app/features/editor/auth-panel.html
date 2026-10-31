@@ -1,0 +1,94 @@
+<div class="panel">
+  <label class="field">
+    <span>Tipo</span>
+    <p-select
+      class="type"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      ariaLabel="Tipo de autenticación"
+      [options]="types"
+      [ngModel]="auth().type"
+      (ngModelChange)="setType($event)"
+    />
+  </label>
+
+  @switch (auth().type) {
+    @case ('bearer') {
+      <label class="field">
+        <span>Token</span>
+        <span class="secret">
+          <input
+            pInputText
+            autocomplete="off"
+            spellcheck="false"
+            [placeholder]="tokenHint"
+            [type]="reveal() ? 'text' : 'password'"
+            [value]="auth().config?.token ?? ''"
+            (input)="setConfig({ token: text($event) })"
+          />
+          <button
+            type="button"
+            class="eye"
+            [attr.aria-label]="reveal() ? 'Ocultar' : 'Mostrar'"
+            (click)="reveal.set(!reveal())"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!reveal()"
+              [class.pi-eye-slash]="reveal()"
+              aria-hidden="true"
+            ></i>
+          </button>
+        </span>
+      </label>
+      <p class="hint">
+        Se envía como <code>Authorization: Bearer …</code>, salvo que añadas tú esa cabecera en
+        Headers.
+      </p>
+    }
+    @case ('basic') {
+      <label class="field">
+        <span>Usuario</span>
+        <input
+          pInputText
+          autocomplete="off"
+          spellcheck="false"
+          [value]="auth().config?.username ?? ''"
+          (input)="setConfig({ username: text($event) })"
+        />
+      </label>
+      <label class="field">
+        <span>Contraseña</span>
+        <span class="secret">
+          <input
+            pInputText
+            autocomplete="new-password"
+            [type]="reveal() ? 'text' : 'password'"
+            [value]="auth().config?.password ?? ''"
+            (input)="setConfig({ password: text($event) })"
+          />
+          <button
+            type="button"
+            class="eye"
+            [attr.aria-label]="reveal() ? 'Ocultar' : 'Mostrar'"
+            (click)="reveal.set(!reveal())"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!reveal()"
+              [class.pi-eye-slash]="reveal()"
+              aria-hidden="true"
+            ></i>
+          </button>
+        </span>
+      </label>
+      <p class="hint">
+        Se envía como <code>Authorization: Basic …</code> (usuario:contraseña en base64).
+      </p>
+    }
+    @default {
+      <p class="hint">Esta petición no envía credenciales.</p>
+    }
+  }
+</div>

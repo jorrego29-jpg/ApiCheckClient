@@ -1,3 +1,5 @@
+@use '../../shared/styles/method-colors' as *;
+
 app-collections-panel {
   display: block;
 
@@ -64,26 +66,7 @@ app-collections-panel {
     font-weight: 600;
     letter-spacing: 0.02em;
     text-align: left;
-    color: var(--text-muted);
-
-    &[data-method='GET'] {
-      color: var(--cyan);
-    }
-    &[data-method='POST'] {
-      color: var(--emerald);
-    }
-    &[data-method='PUT'] {
-      color: var(--amber);
-    }
-    &[data-method='PATCH'] {
-      color: var(--purple);
-    }
-    &[data-method='DELETE'] {
-      color: var(--crimson);
-    }
-    &[data-method='SOAP'] {
-      color: color-mix(in srgb, var(--violet) 55%, white);
-    }
+    @include method-colors;
   }
 
   .more {

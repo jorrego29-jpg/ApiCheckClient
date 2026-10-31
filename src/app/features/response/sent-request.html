@@ -1,0 +1,23 @@
+@let s = sent();
+
+<div class="line">
+  @if (s.method) {
+    <span class="method" [attr.data-method]="s.method">{{ s.method }}</span>
+  }
+  <code class="url">{{ s.url }}</code>
+</div>
+
+@if (s.params.length > 0) {
+  <h4>Params</h4>
+  <app-header-list [rows]="s.params" />
+}
+
+@if (s.headers.length > 0) {
+  <h4>Headers</h4>
+  <app-header-list [rows]="s.headers" />
+}
+
+@if (!s.body.empty) {
+  <h4>Body</h4>
+  <pre class="body">{{ s.body.text }}</pre>
+}

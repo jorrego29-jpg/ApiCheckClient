@@ -1,0 +1,38 @@
+@if (store.tabs().length > 0) {
+  <div class="strip" role="tablist" aria-label="Peticiones abiertas">
+    @for (tab of store.tabs(); track tab.id) {
+      <div class="tab" [class.is-active]="tab.id === store.activeId()">
+        <button
+          type="button"
+          role="tab"
+          class="main"
+          [attr.aria-selected]="tab.id === store.activeId()"
+          [title]="tab.title"
+          (click)="store.activate(tab.id)"
+        >
+          <span class="method" [attr.data-method]="badge(tab)">{{ badge(tab) }}</span>
+          <span class="title">{{ tab.title }}</span>
+          @if (store.dirtyIds().has(tab.id)) {
+            <span
+              class="dirty"
+              role="img"
+              aria-label="Cambios sin guardar"
+              title="Cambios sin guardar"
+            ></span>
+          }
+        </button>
+        <button
+          type="button"
+          class="close"
+          aria-label="Cerrar pestaña"
+          title="Cerrar"
+          (click)="close(tab)"
+        >
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+  </div>
+}
+
+<p-confirmdialog appendTo="body" />
