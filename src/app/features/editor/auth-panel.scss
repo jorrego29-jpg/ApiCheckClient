@@ -1,0 +1,69 @@
+:host {
+  display: block;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+
+  // Mismas medidas que el selector de tipo de arriba.
+  app-variable-input {
+    --vi-padding-x: 0.75rem;
+    --vi-padding-y: 0.5rem;
+  }
+}
+
+.type {
+  width: 100%;
+}
+
+.secret {
+  position: relative;
+  display: block;
+
+  // Deja sitio al botón del ojo.
+  app-variable-input {
+    --vi-padding-end: 34px;
+  }
+}
+
+.eye {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--cyan);
+  }
+}
+
+.hint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+
+  code {
+    font-family: var(--font-mono);
+    color: var(--text);
+  }
+}

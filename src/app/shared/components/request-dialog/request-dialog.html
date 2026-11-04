@@ -1,0 +1,67 @@
+<p-dialog
+  header="Nueva petición"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [style]="{ width: 'min(26rem, 92vw)' }"
+>
+  <form class="form" (ngSubmit)="submit()">
+    <label class="field">
+      <span>Nombre</span>
+      <input
+        pInputText
+        name="name"
+        autocomplete="off"
+        maxlength="120"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+      />
+    </label>
+
+    <div class="row">
+      <label class="field">
+        <span>Protocolo</span>
+        <p-select
+          name="protocol"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="value"
+          [options]="protocols"
+          [ngModel]="protocol()"
+          (ngModelChange)="protocol.set($event)"
+        />
+      </label>
+
+      @if (protocol() === 'REST') {
+        <label class="field">
+          <span>Método</span>
+          <p-select
+            name="method"
+            appendTo="body"
+            [options]="methods"
+            [ngModel]="method()"
+            (ngModelChange)="method.set($event)"
+          />
+        </label>
+      }
+    </div>
+
+    <div class="actions">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (onClick)="visible.set(false)"
+      />
+      <p-button
+        type="submit"
+        label="Crear"
+        [disabled]="!name().trim() || busy()"
+        [loading]="busy()"
+      />
+    </div>
+  </form>
+</p-dialog>

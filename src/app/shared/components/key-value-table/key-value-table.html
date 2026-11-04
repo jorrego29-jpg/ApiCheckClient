@@ -1,0 +1,65 @@
+<div class="table" role="group">
+  @for (row of rows(); track $index) {
+    <div class="row" [class.is-off]="!row.enabled" [attr.data-index]="$index">
+      <input
+        type="checkbox"
+        class="check"
+        aria-label="Fila habilitada"
+        [checked]="row.enabled"
+        (change)="change($index, { enabled: checked($event) })"
+      />
+      <input
+        pInputText
+        class="cell"
+        data-field="key"
+        spellcheck="false"
+        autocomplete="off"
+        [attr.aria-label]="keyPlaceholder()"
+        [placeholder]="keyPlaceholder()"
+        [value]="row.key"
+        (input)="change($index, { key: text($event) })"
+      />
+      <app-variable-input
+        class="value-cell"
+        dataField="value"
+        [label]="valuePlaceholder()"
+        [placeholder]="valuePlaceholder()"
+        [highlight]="highlight()"
+        [value]="row.value"
+        (valueChange)="change($index, { value: $event })"
+      />
+      <button
+        type="button"
+        class="remove"
+        aria-label="Eliminar fila"
+        title="Eliminar fila"
+        (click)="remove($index)"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+
+  <div class="row row--new">
+    <input type="checkbox" class="check" disabled aria-hidden="true" tabindex="-1" />
+    <input
+      pInputText
+      class="cell"
+      spellcheck="false"
+      autocomplete="off"
+      [attr.aria-label]="'Nueva fila: ' + keyPlaceholder()"
+      [placeholder]="keyPlaceholder()"
+      (input)="add($event, 'key')"
+    />
+    <input
+      pInputText
+      class="cell"
+      spellcheck="false"
+      autocomplete="off"
+      [attr.aria-label]="'Nueva fila: ' + valuePlaceholder()"
+      [placeholder]="valuePlaceholder()"
+      (input)="add($event, 'value')"
+    />
+    <span class="remove-space"></span>
+  </div>
+</div>

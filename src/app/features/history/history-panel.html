@@ -1,0 +1,96 @@
+<header class="head">
+  <h2 class="panel-title">Historial</h2>
+  <p-button
+    icon="pi pi-refresh"
+    size="small"
+    severity="secondary"
+    [text]="true"
+    ariaLabel="Actualizar historial"
+    title="Actualizar historial"
+    [disabled]="!workspaces.activeId()"
+    (onClick)="store.refresh()"
+  />
+</header>
+
+<div class="scope" role="group" aria-label="Qué ejecuciones ver">
+  <button
+    type="button"
+    class="scope-option"
+    [attr.aria-pressed]="!filtering()"
+    (click)="setFilter(false)"
+  >
+    Todas
+  </button>
+  <button
+    type="button"
+    class="scope-option"
+    [attr.aria-pressed]="filtering()"
+    [disabled]="!tabs.activeId()"
+    title="Solo las ejecuciones de la petición abierta"
+    (click)="setFilter(true)"
+  >
+    Esta petición
+  </button>
+</div>
+
+@switch (store.status()) {
+  @case ('idle') {
+    <p class="note">Elige un workspace para ver sus ejecuciones.</p>
+  }
+  @case ('loading') {
+    <p class="note">Cargando historial…</p>
+  }
+  @case ('error') {
+    <p class="note">No se pudo cargar el historial.</p>
+    <p-button
+      label="Reintentar"
+      icon="pi pi-refresh"
+      size="small"
+      severity="secondary"
+      [text]="true"
+      (onClick)="store.refresh()"
+    />
+  }
+  @case ('ready') {
+    @if (rows().length === 0) {
+      <p class="note">
+        {{
+          filtering()
+            ? 'Esta petición aún no se ha ejecutado.'
+            : 'Aún no hay ejecuciones. Envía una petición y aparecerá aquí.'
+        }}
+      </p>
+    } @else {
+      <ul class="runs" aria-label="Ejecuciones recientes">
+        @for (row of rows(); track row.entry.id) {
+          <li>
+            <button
+              type="button"
+              class="run"
+              [disabled]="!row.entry.requestId || opening() !== null"
+              [attr.aria-busy]="opening() === row.entry.id"
+              [title]="
+                row.entry.requestId
+                  ? 'Ver esta ejecución en su pestaña'
+                  : 'La petición ya no existe'
+              "
+              (click)="open(row.entry)"
+            >
+              <span class="line">
+                <span class="method" [attr.data-method]="row.badge">{{ row.badge }}</span>
+                <span class="status" [attr.data-kind]="row.statusKind">{{ row.status }}</span>
+                <span class="url">{{ row.url }}</span>
+              </span>
+              <span class="meta">
+                @if (row.name && !filtering()) {
+                  <span class="name">{{ row.name }}</span>
+                }
+                <span>{{ row.when }} · {{ row.duration }}</span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+}

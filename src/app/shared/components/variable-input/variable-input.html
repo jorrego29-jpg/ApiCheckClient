@@ -1,0 +1,36 @@
+<span class="wrap">
+  @if (shown()) {
+    <span class="mirror" aria-hidden="true" #mirror>
+      <span class="text">
+        @for (segment of segments(); track $index) {
+          @if (segment.variable; as variable) {
+            <mark class="var" [class.is-missing]="!variable.defined">{{ segment.text }}</mark>
+          } @else {
+            <span>{{ segment.text }}</span>
+          }
+        }
+      </span>
+    </span>
+  }
+  <input
+    #field
+    pInputText
+    class="input"
+    spellcheck="false"
+    [type]="type()"
+    [attr.data-field]="dataField()"
+    [attr.aria-label]="label()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.title]="hint()"
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="onInput($event)"
+    (keydown.enter)="enter.emit()"
+    (scroll)="sync()"
+    (keyup)="sync()"
+    (click)="sync()"
+    (focus)="sync()"
+    (select)="sync()"
+    (mousemove)="sync()"
+  />
+</span>

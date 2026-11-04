@@ -1,0 +1,57 @@
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 8px;
+}
+
+.field {
+  --vi-padding-x: 0.6rem;
+  --vi-padding-y: 0;
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 30px;
+}
+
+.row .p-button {
+  height: 30px;
+}
+
+.operation {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.version {
+  padding: 2px 8px;
+  border: 1px solid var(--cyan-border);
+  border-radius: var(--radius-pill);
+  background: var(--cyan-wash);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--cyan);
+  white-space: nowrap;
+}
+
+.editor {
+  height: 100%;
+  min-height: 160px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.hint {
+  margin: 0 0 8px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}

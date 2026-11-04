@@ -1,0 +1,25 @@
+<p-select
+  class="select"
+  optionLabel="name"
+  optionValue="id"
+  appendTo="body"
+  ariaLabel="Entorno"
+  [options]="options()"
+  [ngModel]="store.activeId()"
+  (ngModelChange)="store.select($event ?? '')"
+  [placeholder]="placeholder()"
+  [loading]="store.status() === 'loading'"
+  [disabled]="!available()"
+/>
+<p-button
+  icon="pi pi-cog"
+  severity="secondary"
+  size="small"
+  [text]="true"
+  ariaLabel="Gestionar entornos"
+  title="Gestionar entornos y variables"
+  [disabled]="!manageable()"
+  (onClick)="managing.set(true)"
+/>
+
+<app-environments-dialog [(visible)]="managing" />

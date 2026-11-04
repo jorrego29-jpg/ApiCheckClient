@@ -1,0 +1,23 @@
+// Color de la etiqueta de método HTTP (GET, POST…) y de SOAP. Se aplica con data-method.
+@mixin method-colors {
+  color: var(--text-muted);
+
+  &[data-method='GET'] {
+    color: var(--cyan);
+  }
+  &[data-method='POST'] {
+    color: var(--emerald);
+  }
+  &[data-method='PUT'] {
+    color: var(--amber);
+  }
+  &[data-method='PATCH'] {
+    color: var(--purple);
+  }
+  &[data-method='DELETE'] {
+    color: var(--crimson);
+  }
+  &[data-method='SOAP'] {
+    color: color-mix(in srgb, var(--violet) 55%, white);
+  }
+}

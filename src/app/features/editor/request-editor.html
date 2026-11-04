@@ -1,0 +1,131 @@
+<app-tabs-bar />
+
+@if (tab(); as t) {
+  <div class="urlbar">
+    @if (t.draft.protocol === 'SOAP') {
+      <span class="protocol" title="Protocolo">SOAP</span>
+    } @else {
+      <p-select
+        class="method"
+        appendTo="body"
+        ariaLabel="Método HTTP"
+        [options]="methods()"
+        [ngModel]="t.draft.method"
+        (ngModelChange)="setMethod($event)"
+      />
+    }
+    <app-variable-input
+      class="url"
+      label="URL"
+      [placeholder]="
+        t.draft.protocol === 'SOAP'
+          ? 'https://servicio.com/endpoint (dirección del servicio)'
+          : 'https://api.ejemplo.com/recurso'
+      "
+      [value]="t.draft.url"
+      (valueChange)="setUrl($event)"
+      (enter)="send()"
+    />
+
+    @if (t.running) {
+      <p-button
+        label="Cancelar"
+        icon="pi pi-stop-circle"
+        severity="secondary"
+        (onClick)="cancel()"
+      />
+    } @else {
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        [title]="sendHint()"
+        [disabled]="!sendable()"
+        (onClick)="send()"
+      />
+    }
+    <p-button
+      icon="pi pi-save"
+      severity="secondary"
+      [outlined]="true"
+      ariaLabel="Guardar"
+      title="Guardar (Ctrl+S)"
+      [disabled]="!dirty()"
+      [loading]="saving()"
+      (onClick)="save()"
+    />
+  </div>
+
+  @if (t.draft.protocol === 'SOAP') {
+    <!-- Una por petición: así el WSDL y la operación elegida no cruzan de una a otra. -->
+    @for (id of [t.id]; track id) {
+      <app-soap-editor />
+    }
+  } @else {
+    <p-tabs class="sections" [value]="section()" (valueChange)="setSection($event)">
+      <p-tablist>
+        <p-tab value="params">
+          Params
+          @if (paramsCount() > 0) {
+            <span class="count">{{ paramsCount() }}</span>
+          }
+        </p-tab>
+        <p-tab value="headers">
+          Headers
+          @if (headersCount() > 0) {
+            <span class="count">{{ headersCount() }}</span>
+          }
+        </p-tab>
+        <p-tab value="body">
+          Body
+          @if (bodyOn()) {
+            <span class="dot" aria-label="con contenido"></span>
+          }
+        </p-tab>
+        <p-tab value="auth">
+          Auth
+          @if (authOn()) {
+            <span class="dot" aria-label="configurada"></span>
+          }
+        </p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="params">
+          @if (section() === 'params') {
+            <app-key-value-table
+              keyPlaceholder="Parámetro"
+              [rows]="t.draft.params"
+              (rowsChange)="setParams($event)"
+            />
+          }
+        </p-tabpanel>
+        <p-tabpanel value="headers">
+          @if (section() === 'headers') {
+            <app-key-value-table
+              keyPlaceholder="Cabecera"
+              [rows]="t.draft.headers"
+              (rowsChange)="setHeaders($event)"
+            />
+          }
+        </p-tabpanel>
+        <p-tabpanel value="body">
+          @if (section() === 'body') {
+            <!-- Una por petición: así el historial de deshacer del editor no cruza de una a otra. -->
+            @for (id of [t.id]; track id) {
+              <app-body-panel [body]="t.draft.body" (bodyChange)="setBody($event)" />
+            }
+          }
+        </p-tabpanel>
+        <p-tabpanel value="auth">
+          @if (section() === 'auth') {
+            <app-auth-panel [auth]="t.draft.auth" (authChange)="setAuth($event)" />
+          }
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  }
+} @else {
+  <app-empty-state
+    >Selecciona una petición del árbol o crea una nueva para empezar.</app-empty-state
+  >
+}

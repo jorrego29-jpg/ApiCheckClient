@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1.4fr) 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+
+  &.is-off .cell,
+  &.is-off .value-cell {
+    opacity: 0.5;
+  }
+
+  &--new .cell {
+    border-style: dashed;
+  }
+}
+
+.check {
+  width: 14px;
+  height: 14px;
+  margin: 0 auto;
+  accent-color: var(--cyan);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+}
+
+.cell {
+  width: 100%;
+  min-width: 0;
+  padding: 0.3rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.4; // igual que el campo con variables, para que las filas midan lo mismo
+}
+
+.value-cell {
+  width: 100%;
+  min-width: 0;
+}
+
+.remove {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--danger);
+    background: var(--surface-2);
+  }
+}

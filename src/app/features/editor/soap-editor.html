@@ -1,0 +1,117 @@
+@let t = tab();
+
+@if (t) {
+  <div class="row">
+    <app-variable-input
+      class="field"
+      label="URL del WSDL"
+      placeholder="https://servicio.com/calculadora.asmx?WSDL (opcional)"
+      [value]="t.draft.wsdlUrl ?? ''"
+      (valueChange)="setWsdlUrl($event)"
+      (enter)="load()"
+    />
+    <p-button
+      label="Cargar"
+      icon="pi pi-cloud-download"
+      size="small"
+      severity="secondary"
+      title="Leer las operaciones del WSDL"
+      [loading]="loading()"
+      [disabled]="!canLoad()"
+      (onClick)="load()"
+    />
+  </div>
+
+  @if (t.wsdl) {
+    <div class="row operations">
+      <p-select
+        class="operation"
+        appendTo="body"
+        optionLabel="label"
+        optionValue="key"
+        placeholder="Elige una operación"
+        ariaLabel="Operación"
+        [options]="options()"
+        [ngModel]="picked()"
+        (ngModelChange)="pick($event)"
+      />
+      @if (operation(); as op) {
+        <span class="version" title="Versión de SOAP del puerto">SOAP {{ op.soapVersion }}</span>
+      }
+      <p-button
+        label="Generar envelope"
+        icon="pi pi-file-edit"
+        size="small"
+        severity="secondary"
+        title="Poner el envelope de ejemplo de la operación"
+        [disabled]="!operation()"
+        (onClick)="generate()"
+      />
+    </div>
+  }
+
+  <div class="row">
+    <app-variable-input
+      class="field"
+      label="SOAPAction"
+      placeholder="SOAPAction (por ejemplo http://tempuri.org/Add)"
+      [value]="t.draft.soapAction ?? ''"
+      (valueChange)="setAction($event)"
+    />
+  </div>
+
+  <p-tabs class="sections" [value]="section()" (valueChange)="setSection($event)">
+    <p-tablist>
+      <p-tab value="envelope">Envelope</p-tab>
+      <p-tab value="headers">
+        Headers
+        @if (headersCount() > 0) {
+          <span class="count">{{ headersCount() }}</span>
+        }
+      </p-tab>
+      <p-tab value="auth">
+        Auth
+        @if (authOn()) {
+          <span class="dot" aria-label="configurada"></span>
+        }
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="envelope">
+        @if (section() === 'envelope') {
+          <div class="editor">
+            <app-code-editor
+              ariaLabel="Envelope SOAP"
+              language="xml"
+              placeholderText="<soap:Envelope>…</soap:Envelope>"
+              [variables]="environments.variables()"
+              [value]="t.draft.body.content"
+              (valueChange)="setEnvelope($event)"
+            />
+          </div>
+        }
+      </p-tabpanel>
+      <p-tabpanel value="headers">
+        @if (section() === 'headers') {
+          <p class="hint">
+            Content-Type y SOAPAction los pone el backend según la versión del envelope; aquí solo
+            lo que quieras añadir o cambiar.
+          </p>
+          <app-key-value-table
+            keyPlaceholder="Cabecera"
+            [rows]="t.draft.headers"
+            (rowsChange)="setHeaders($event)"
+          />
+        }
+      </p-tabpanel>
+      <p-tabpanel value="auth">
+        @if (section() === 'auth') {
+          <app-auth-panel [auth]="t.draft.auth" (authChange)="setAuth($event)" />
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  <p-confirmdialog appendTo="body" />
+}

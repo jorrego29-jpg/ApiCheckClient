@@ -1,0 +1,41 @@
+<div class="panel">
+  <div class="bar">
+    <p-select-button
+      optionLabel="label"
+      optionValue="value"
+      optionDisabled="disabled"
+      size="small"
+      ariaLabelledBy="Tipo de body"
+      [options]="types"
+      [allowEmpty]="false"
+      [ngModel]="body().type"
+      (ngModelChange)="setType($event)"
+    />
+
+    @if (body().type === 'json') {
+      <p-button
+        label="Formatear"
+        icon="pi pi-align-left"
+        size="small"
+        severity="secondary"
+        [text]="true"
+        (onClick)="format()"
+      />
+    }
+  </div>
+
+  @if (body().type === 'none' || body().type === 'form-data') {
+    <p class="hint">Esta petición no envía body.</p>
+  } @else {
+    <div class="editor">
+      <app-code-editor
+        ariaLabel="Contenido del body"
+        [language]="language()"
+        [placeholderText]="hint()"
+        [variables]="environments.variables()"
+        [value]="body().content"
+        (valueChange)="setContent($event)"
+      />
+    </div>
+  }
+</div>

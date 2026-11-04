@@ -1,0 +1,39 @@
+<p-dialog
+  [header]="title()"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [style]="{ width: 'min(24rem, 92vw)' }"
+>
+  <form class="form" (ngSubmit)="submit()">
+    <label class="field">
+      <span>{{ label() }}</span>
+      <input
+        pInputText
+        name="name"
+        autocomplete="off"
+        maxlength="120"
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+      />
+    </label>
+
+    <div class="actions">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (onClick)="visible.set(false)"
+      />
+      <p-button
+        type="submit"
+        [label]="confirmLabel()"
+        [disabled]="!draft().trim() || busy()"
+        [loading]="busy()"
+      />
+    </div>
+  </form>
+</p-dialog>

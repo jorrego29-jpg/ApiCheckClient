@@ -1,0 +1,90 @@
+<div class="panel">
+  <label class="field">
+    <span>Tipo</span>
+    <p-select
+      class="type"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      ariaLabel="Tipo de autenticación"
+      [options]="types"
+      [ngModel]="auth().type"
+      (ngModelChange)="setType($event)"
+    />
+  </label>
+
+  @switch (auth().type) {
+    @case ('bearer') {
+      <label class="field">
+        <span>Token</span>
+        <span class="secret">
+          <app-variable-input
+            label="Token"
+            [placeholder]="tokenHint"
+            [type]="reveal() ? 'text' : 'password'"
+            [value]="auth().config?.token ?? ''"
+            (valueChange)="setConfig({ token: $event })"
+          />
+          <button
+            type="button"
+            class="eye"
+            [attr.aria-label]="reveal() ? 'Ocultar' : 'Mostrar'"
+            (click)="reveal.set(!reveal())"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!reveal()"
+              [class.pi-eye-slash]="reveal()"
+              aria-hidden="true"
+            ></i>
+          </button>
+        </span>
+      </label>
+      <p class="hint">
+        Se envía como <code>Authorization: Bearer …</code>, salvo que añadas tú esa cabecera en
+        Headers.
+      </p>
+    }
+    @case ('basic') {
+      <label class="field">
+        <span>Usuario</span>
+        <app-variable-input
+          label="Usuario"
+          [value]="auth().config?.username ?? ''"
+          (valueChange)="setConfig({ username: $event })"
+        />
+      </label>
+      <label class="field">
+        <span>Contraseña</span>
+        <span class="secret">
+          <app-variable-input
+            label="Contraseña"
+            autocomplete="new-password"
+            [type]="reveal() ? 'text' : 'password'"
+            [value]="auth().config?.password ?? ''"
+            (valueChange)="setConfig({ password: $event })"
+          />
+          <button
+            type="button"
+            class="eye"
+            [attr.aria-label]="reveal() ? 'Ocultar' : 'Mostrar'"
+            (click)="reveal.set(!reveal())"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!reveal()"
+              [class.pi-eye-slash]="reveal()"
+              aria-hidden="true"
+            ></i>
+          </button>
+        </span>
+      </label>
+      <p class="hint">
+        Se envía como <code>Authorization: Basic …</code> (usuario:contraseña en base64).
+      </p>
+    }
+    @default {
+      <p class="hint">Esta petición no envía credenciales.</p>
+    }
+  }
+</div>

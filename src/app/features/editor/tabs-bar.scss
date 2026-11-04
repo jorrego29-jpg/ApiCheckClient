@@ -1,0 +1,94 @@
+@use '../../shared/styles/method-colors' as *;
+
+:host {
+  display: block;
+  flex: none;
+}
+
+.strip {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.tab {
+  display: flex;
+  flex: none;
+  align-items: center;
+  max-width: 220px;
+  border-right: 1px solid var(--border);
+  border-bottom: 2px solid transparent;
+  background: var(--surface);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &.is-active {
+    border-bottom-color: var(--cyan);
+    background: var(--bg);
+  }
+}
+
+.main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 4px 7px 12px;
+  border: 0;
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+
+  .is-active & {
+    color: var(--text);
+  }
+}
+
+.method {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+
+  @include method-colors;
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dirty {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0 6px 0 2px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text);
+    background: var(--surface-3);
+  }
+}
