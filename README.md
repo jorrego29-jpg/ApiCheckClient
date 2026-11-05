@@ -1,59 +1,56 @@
-# ApiCheckClient21
+# APICheck — Cliente
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.29.
+Interfaz web de **APICheck**, una aplicación tipo Postman para probar servicios **REST** y **SOAP**. Se conecta a la API del repo [ApiCheck](https://github.com/jorrego29-jpg/ApiCheck).
 
-## Development server
+## Qué permite
 
-To start a local development server, run:
+- Organizar el trabajo en **workspaces**, con **colecciones**, carpetas y peticiones.
+- Editar y enviar peticiones **REST** (método, URL, parámetros, headers, cuerpo y autenticación) y **SOAP** (carga del WSDL, elección de operación, envelope, SOAPAction).
+- Usar **variables** `{{nombre}}` en cualquier campo, con **entornos** y variables globales por workspace.
+- Ver la respuesta: estado, tiempo, tamaño, headers y cuerpo (JSON y XML con formato y color).
+- Consultar el **historial** de ejecuciones, filtrarlo por la petición abierta y reabrir una ejecución en su pestaña.
 
-```bash
-ng serve
-```
+## Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- [Angular](https://angular.dev) 21: componentes standalone, signals y sin Zone.js
+- [PrimeNG](https://primeng.org) 21 y CodeMirror 6 para los editores
+- Vitest con jsdom para las pruebas
 
-## Code scaffolding
+## Requisitos
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js 22 o superior
+- La API de APICheck corriendo en `http://localhost:3000` (ver el README de ese repo)
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Puesta en marcha
 
 ```bash
-ng build
+npm install
+npm start        # http://localhost:4200
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+En desarrollo `proxy.conf.json` redirige `/api/*` a `http://localhost:3000`, así que no hace falta configurar CORS.
 
-## Running unit tests
+## Scripts
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Comando | Qué hace |
+| --- | --- |
+| `npm start` | Servidor de desarrollo con recarga |
+| `npm test` | Pruebas unitarias (Vitest); `npm test -- --no-watch` para una sola pasada |
+| `npm run build` | Compilación de producción en `dist/ApiCheckClient21/browser` |
 
-```bash
-ng test
+## Estructura
+
+```text
+src/app/
+  core/          api (clientes HTTP), models, state (stores con signals), requests,
+                 variables, history, notifications e interceptores
+  features/      collections, editor (REST y SOAP), environments, response, history
+  layout/        shell, panel lateral y selectores de workspace y entorno
+  shared/        componentes reutilizables (editor de código, tabla clave-valor, diálogos…)
+src/environments/  environment.ts (desarrollo, apiUrl '/api') y environment.prod.ts
 ```
 
-## Running end-to-end tests
+## CI y despliegue
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **GitHub Actions** (`.github/workflows/ci-cd.yml`) ejecuta las pruebas y la compilación en cada push y PR a `main` y `develop`.
+- **Vercel** despliega con su integración de GitHub (producción desde `main`, previews en PR). `vercel.json` fija la carpeta de salida y reenvía `/api/*` al backend, así que el navegador solo habla con un origen. Antes de desplegar, cambia el destino del rewrite (`https://backend.example.com`) por el dominio del backend. Los pasos completos están en `DESPLIEGUE.md` del repo [ApiCheck](https://github.com/jorrego29-jpg/ApiCheck).
