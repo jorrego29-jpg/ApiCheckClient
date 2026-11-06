@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
+import { ToggleButton } from 'primeng/togglebutton';
 import { finalize } from 'rxjs';
 import {
   EXECUTABLE_METHODS,
@@ -26,6 +27,7 @@ import {
   withParams,
   withUrl,
 } from '../../core/requests/request-draft';
+import { SettingsStore } from '../../core/state/settings.store';
 import { TabsStore } from '../../core/state/tabs.store';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { KeyValueTable } from '../../shared/components/key-value-table/key-value-table';
@@ -53,6 +55,7 @@ const activeRows = (rows: readonly KeyValue[]) =>
     Tab,
     TabPanels,
     TabPanel,
+    ToggleButton,
     TabsBar,
     EmptyState,
     KeyValueTable,
@@ -68,6 +71,7 @@ const activeRows = (rows: readonly KeyValue[]) =>
 })
 export class RequestEditor {
   protected readonly store = inject(TabsStore);
+  protected readonly settings = inject(SettingsStore);
   protected readonly tab = this.store.active;
 
   protected readonly section = signal<Section>('params');

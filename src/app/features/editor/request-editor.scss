@@ -44,6 +44,16 @@ app-request-editor {
     height: 30px;
   }
 
+  // Activo = se salta la verificación: se pinta en aviso para que no pase desapercibido.
+  .urlbar .ssl {
+    --p-togglebutton-checked-background: var(--warn);
+    --p-togglebutton-checked-border-color: var(--warn);
+    --p-togglebutton-checked-color: #1a1205;
+    --p-togglebutton-content-checked-background: transparent;
+    height: 30px;
+    min-width: 8.5rem;
+  }
+
   // ── Secciones (p-tabs) ───────────────────────────────────────────
   .sections {
     --p-tabs-tablist-background: transparent;

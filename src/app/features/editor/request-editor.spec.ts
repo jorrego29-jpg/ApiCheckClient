@@ -135,6 +135,34 @@ describe('RequestEditor', () => {
     expect(button('Enviar')).toBeDefined();
   });
 
+  describe('the SSL toggle', () => {
+    const toggle = () => element().querySelector<HTMLElement>('p-togglebutton')!;
+
+    it('verifies SSL by default and the request says nothing about it', async () => {
+      await openWith();
+      expect(toggle().getAttribute('aria-pressed')).toBe('false');
+
+      button('Enviar')!.click();
+      const run = http.expectOne({ method: 'POST', url: '/api/execution/run' });
+      expect(run.request.body).not.toHaveProperty('ignoreSsl');
+      run.flush(okResult);
+    });
+
+    it('asks the backend to ignore SSL once it is turned on, and remembers it', async () => {
+      await openWith();
+
+      toggle().click();
+      await fixture.whenStable();
+      expect(toggle().getAttribute('aria-pressed')).toBe('true');
+
+      button('Enviar')!.click();
+      const run = http.expectOne({ method: 'POST', url: '/api/execution/run' });
+      expect(run.request.body).toMatchObject({ ignoreSsl: true });
+      run.flush(okResult);
+      expect(localStorage.getItem('apicheck.ignoreSsl')).toBe('true');
+    });
+  });
+
   it('sends with Ctrl+Enter', async () => {
     await openWith();
 

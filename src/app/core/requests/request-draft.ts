@@ -320,6 +320,7 @@ export interface ExecutionContext {
   requestId?: string;
   workspaceId?: string;
   environmentId?: string;
+  ignoreSsl?: boolean;
   resolve?: (text: string) => string;
 }
 
@@ -362,6 +363,7 @@ export function toExecutionDto(
     ...(Object.keys(queryParams).length ? { queryParams } : {}),
     // El texto del body viaja tal cual: así las {{variables}} sin comillas siguen siendo válidas.
     ...(hasBody ? { body: content } : {}),
+    ...(context.ignoreSsl ? { ignoreSsl: true } : {}),
     ...(context.workspaceId ? { workspaceId: context.workspaceId } : {}),
     ...(context.environmentId ? { environmentId: context.environmentId } : {}),
   };
@@ -384,6 +386,7 @@ function toSoapExecutionDto(
     ...(Object.keys(headers).length ? { headers } : {}),
     body: draft.body.content,
     ...(soapAction ? { soapAction } : {}),
+    ...(context.ignoreSsl ? { ignoreSsl: true } : {}),
     ...(context.workspaceId ? { workspaceId: context.workspaceId } : {}),
     ...(context.environmentId ? { environmentId: context.environmentId } : {}),
   };

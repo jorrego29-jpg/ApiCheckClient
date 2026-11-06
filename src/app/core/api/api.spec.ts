@@ -179,6 +179,16 @@ describe('API services', () => {
         url: 'http://x/calc.asmx?WSDL',
       }).flush({});
     });
+
+    it('asks the backend to skip TLS verification only when told to', () => {
+      TestBed.inject(ExecutionApi)
+        .inspectWsdl('https://localhost:7235/s.asmx?wsdl', true)
+        .subscribe();
+      expectCall('GET', '/api/execution/soap/inspect-wsdl', {
+        url: 'https://localhost:7235/s.asmx?wsdl',
+        ignoreSsl: 'true',
+      }).flush({});
+    });
   });
 
   describe('HistoryApi', () => {

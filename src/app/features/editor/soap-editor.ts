@@ -11,6 +11,7 @@ import { KeyValue, RequestAuth, WsdlOperation } from '../../core/models';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { RequestDraft, withScheme } from '../../core/requests/request-draft';
 import { EnvironmentStore } from '../../core/state/environment.store';
+import { SettingsStore } from '../../core/state/settings.store';
 import { TabsStore } from '../../core/state/tabs.store';
 import { interpolate } from '../../core/variables/variables';
 import { CodeEditor } from '../../shared/components/code-editor/code-editor';
@@ -58,6 +59,7 @@ export class SoapEditor {
   private readonly confirmation = inject(ConfirmationService);
   private readonly notifications = inject(NotificationService);
   protected readonly environments = inject(EnvironmentStore);
+  private readonly settings = inject(SettingsStore);
 
   protected readonly tab = this.store.active;
   protected readonly section = signal<Section>('envelope');
@@ -140,7 +142,7 @@ export class SoapEditor {
     const url = withScheme(interpolate(typed, this.environments.variables()));
     this.loading.set(true);
     this.api
-      .inspectWsdl(url)
+      .inspectWsdl(url, this.settings.ignoreSsl())
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (wsdl) => {

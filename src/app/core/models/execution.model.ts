@@ -11,6 +11,7 @@ export interface ExecuteRequestDto {
   body?: unknown;
   soapAction?: string; // en modo WSDL es el nombre de la operación
   wsdlUrl?: string;
+  ignoreSsl?: boolean; // el backend no verifica el certificado TLS del destino
   variables?: Record<string, string>; // pisan a las del entorno
   environmentId?: string;
   workspaceId?: string; // carga también las variables globales del workspace

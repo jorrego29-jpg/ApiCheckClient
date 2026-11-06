@@ -23,6 +23,7 @@ import { CollectionsStore } from './collections.store';
 import { EnvironmentStore } from './environment.store';
 import { HistoryStore } from './history.store';
 import { findRequest } from './request-lookup';
+import { SettingsStore } from './settings.store';
 import { WorkspaceStore } from './workspace.store';
 
 /** Una petición abierta en el editor, con sus cambios sin guardar y su última respuesta. */
@@ -49,6 +50,7 @@ export class TabsStore {
   private readonly executionApi = inject(ExecutionApi);
   private readonly history = inject(HistoryStore);
   private readonly notifications = inject(NotificationService);
+  private readonly settings = inject(SettingsStore);
 
   private readonly list = signal<EditorTab[]>([]);
   private readonly current = signal<string | null>(null);
@@ -149,6 +151,7 @@ export class TabsStore {
       requestId: id,
       workspaceId: this.workspaces.activeId() ?? undefined,
       environmentId: this.environments.activeId() || undefined,
+      ignoreSsl: this.settings.ignoreSsl(),
       // El backend sustituye las {{variables}} de URL, headers y body, pero en Basic las recibe ya en base64.
       resolve: (text) => interpolate(text, this.environments.variables()),
     });
