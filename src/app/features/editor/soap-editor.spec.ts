@@ -6,6 +6,7 @@ import { By } from '@angular/platform-browser';
 import { MessageService } from 'primeng/api';
 import { SavedRequest, WsdlInspection } from '../../core/models';
 import { CollectionsStore } from '../../core/state/collections.store';
+import { SettingsStore } from '../../core/state/settings.store';
 import { TabsStore } from '../../core/state/tabs.store';
 import { CodeEditor } from '../../shared/components/code-editor/code-editor';
 import { savedRequest, seedWorkspace } from '../../testing/editor.testing';
@@ -172,6 +173,16 @@ describe('SoapEditor', () => {
 
       expect(tabs.active()?.wsdl).toEqual(inspection);
       expect(element().querySelector('p-select.operation')).not.toBeNull();
+    });
+
+    it('asks the backend to skip TLS verification when the SSL toggle is on', async () => {
+      await openWith({ wsdlUrl: 'https://localhost:7235/svc.asmx?wsdl' });
+      TestBed.inject(SettingsStore).setIgnoreSsl(true);
+
+      button('Cargar')!.click();
+      const request = http.expectOne((req) => req.url === '/api/execution/soap/inspect-wsdl');
+      expect(request.request.params.get('ignoreSsl')).toBe('true');
+      request.flush(inspection);
     });
   });
 

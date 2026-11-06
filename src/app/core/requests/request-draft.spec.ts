@@ -444,3 +444,20 @@ describe('SOAP drafts', () => {
     expect(dto.headers).toEqual({ 'X-Trace': '1', Authorization: 'Bearer abc' });
   });
 });
+
+describe('ignoreSsl', () => {
+  const soapDraft = draft({
+    protocol: 'SOAP',
+    url: 'https://localhost:7235/svc.asmx',
+    body: { type: 'xml', content: '<soap:Envelope/>' },
+  });
+
+  it('travels with a REST or SOAP request only when it is on', () => {
+    expect(toExecutionDto(draft(), { ignoreSsl: true }).ignoreSsl).toBe(true);
+    expect(toExecutionDto(soapDraft, { ignoreSsl: true }).ignoreSsl).toBe(true);
+
+    expect(toExecutionDto(draft())).not.toHaveProperty('ignoreSsl');
+    expect(toExecutionDto(draft(), { ignoreSsl: false })).not.toHaveProperty('ignoreSsl');
+    expect(toExecutionDto(soapDraft, { ignoreSsl: false })).not.toHaveProperty('ignoreSsl');
+  });
+});

@@ -27,6 +27,19 @@
       (enter)="send()"
     />
 
+    <p-togglebutton
+      class="ssl"
+      size="small"
+      ariaLabel="Ignorar la verificación del certificado SSL"
+      title="Si está activo, el backend no verifica el certificado SSL del destino (útil con certificados autofirmados de desarrollo). Vale para todas las peticiones."
+      onLabel="SSL ignorado"
+      offLabel="SSL verificado"
+      onIcon="pi pi-lock-open"
+      offIcon="pi pi-lock"
+      [ngModel]="settings.ignoreSsl()"
+      (ngModelChange)="settings.setIgnoreSsl($event)"
+    />
+
     @if (t.running) {
       <p-button
         label="Cancelar"

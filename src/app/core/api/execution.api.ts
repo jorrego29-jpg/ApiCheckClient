@@ -13,8 +13,9 @@ export class ExecutionApi {
     return this.http.post<ExecutionResult>(`${this.baseUrl}/run`, dto);
   }
 
-  inspectWsdl(wsdlUrl: string) {
-    const params = new HttpParams().set('url', wsdlUrl);
+  inspectWsdl(wsdlUrl: string, ignoreSsl = false) {
+    let params = new HttpParams().set('url', wsdlUrl);
+    if (ignoreSsl) params = params.set('ignoreSsl', 'true');
     return this.http.get<WsdlInspection>(`${this.baseUrl}/soap/inspect-wsdl`, { params });
   }
 }
