@@ -240,6 +240,54 @@ describe('toExecutionDto', () => {
     ).toBeUndefined();
   });
 
+  it('sends form-data as fields and files, without body or Content-Type', () => {
+    const dto = toExecutionDto(
+      draft({
+        method: 'POST',
+        body: {
+          type: 'form-data',
+          content: '{"resto": "de otro tipo"}',
+          fields: [row('nombre', '{{nombre}}'), row('off', 'x', false), row('', 'huérfano')],
+          files: [
+            { key: 'doc', name: 'a.pdf', type: 'application/pdf', data: 'QUJD' },
+            { key: 'sin-contenido', name: 'b.pdf', type: '', data: '' },
+          ],
+        },
+      }),
+    );
+
+    expect(dto.formData).toEqual([
+      { key: 'nombre', value: '{{nombre}}' },
+      { key: 'doc', value: 'QUJD', fileName: 'a.pdf', contentType: 'application/pdf' },
+    ]);
+    expect(dto.body).toBeUndefined();
+    expect(dto.headers).toBeUndefined();
+  });
+
+  it('saves form-data without the content of its files and reopens it unchanged', () => {
+    const original = draft({
+      method: 'POST',
+      body: {
+        type: 'form-data',
+        content: '',
+        fields: [row('nombre', 'x'), row('', '')],
+        files: [{ key: 'doc', name: 'a.pdf', type: 'application/pdf', data: 'QUJD' }],
+      },
+    });
+
+    const dto = toSaveDto(original);
+    expect(dto.body).toEqual({
+      type: 'form-data',
+      content: '',
+      fields: [row('nombre', 'x')],
+      files: [{ key: 'doc', name: 'a.pdf', type: '', data: '' }],
+    });
+
+    const reopened = draftFromSaved(saved({ method: 'POST', body: dto.body as never }));
+    expect(draftsEqual(reopened, original)).toBe(true);
+    expect(toExecutionDto(reopened).formData).toEqual([{ key: 'nombre', value: 'x' }]);
+  });
+
   it('adds the Authorization header from the Auth tab', () => {
     const dto = toExecutionDto(draft({ auth: { type: 'bearer', config: { token: 't' } } }));
     expect(dto.headers).toEqual({ Authorization: 'Bearer t' });

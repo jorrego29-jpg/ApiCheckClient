@@ -9,12 +9,21 @@ export interface ExecuteRequestDto {
   headers?: Record<string, string>;
   queryParams?: Record<string, string>;
   body?: unknown;
+  formData?: FormDataField[]; // solo REST: la petición sale como multipart/form-data
   soapAction?: string; // en modo WSDL es el nombre de la operación
   wsdlUrl?: string;
   ignoreSsl?: boolean; // el backend no verifica el certificado TLS del destino
   variables?: Record<string, string>; // pisan a las del entorno
   environmentId?: string;
   workspaceId?: string; // carga también las variables globales del workspace
+}
+
+/** Con `fileName` es un archivo y `value` su contenido en base64; sin él, un campo de texto. */
+export interface FormDataField {
+  key: string;
+  value: string;
+  fileName?: string;
+  contentType?: string;
 }
 
 export interface ExecutionMetrics {

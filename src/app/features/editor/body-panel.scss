@@ -28,6 +28,103 @@
   background: var(--surface);
 }
 
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.files-title {
+  margin: 6px 0 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+// Mismas columnas que la tabla de campos, para que las filas queden alineadas.
+.file {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1.4fr) 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+
+  .cell {
+    grid-column: 2;
+    width: 100%;
+    min-width: 0;
+    padding: 0.3rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+}
+
+.pick {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0.3rem 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-within {
+    border-color: var(--cyan);
+  }
+
+  &.is-missing {
+    color: var(--text-muted);
+  }
+}
+
+// Invisible pero enfocable con el teclado: el <label> hace de botón.
+.pick-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pick-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick-warn {
+  flex: none;
+  color: var(--amber);
+  font-size: var(--text-xs);
+}
+
+.remove {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--danger);
+    background: var(--surface-2);
+  }
+}
+
 .hint {
   font-size: var(--text-sm);
   color: var(--text-muted);

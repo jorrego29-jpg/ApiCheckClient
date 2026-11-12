@@ -45,8 +45,11 @@ export interface ErrorView {
 
 export type ResultView = ResponseView | ErrorView;
 
-/** A partir de este tamaño (en caracteres) el cuerpo no se carga en el editor. */
-export const LARGE_BODY = 1_000_000;
+/**
+ * A partir de este tamaño (en caracteres) el cuerpo no se carga en el editor. Da para un archivo de
+ * unos 15 MB en base64: el editor solo pinta lo que se ve, así que una línea de megas no le pesa.
+ */
+export const LARGE_BODY = 20_000_000;
 /** Cuántos caracteres se muestran de un cuerpo grande. */
 export const LARGE_BODY_PREVIEW = 100_000;
 
