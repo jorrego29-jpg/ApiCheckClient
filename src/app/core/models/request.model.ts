@@ -19,6 +19,17 @@ export type BodyType = 'none' | 'json' | 'xml' | 'form-data';
 export interface RequestBody {
   type: BodyType;
   content: string;
+  /** Solo form-data: campos de texto y archivos. */
+  fields?: KeyValue[];
+  files?: FormDataFile[];
+}
+
+/** Archivo de un body form-data. `data` (base64) vive solo en la pestaña abierta: no se guarda con la petición. */
+export interface FormDataFile {
+  key: string;
+  name: string;
+  type: string;
+  data: string;
 }
 
 export type AuthType = 'none' | 'bearer' | 'basic';

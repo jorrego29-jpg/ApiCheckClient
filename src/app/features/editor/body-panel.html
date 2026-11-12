@@ -3,7 +3,6 @@
     <p-select-button
       optionLabel="label"
       optionValue="value"
-      optionDisabled="disabled"
       size="small"
       ariaLabelledBy="Tipo de body"
       [options]="types"
@@ -24,8 +23,68 @@
     }
   </div>
 
-  @if (body().type === 'none' || body().type === 'form-data') {
+  @if (body().type === 'none') {
     <p class="hint">Esta petición no envía body.</p>
+  } @else if (body().type === 'form-data') {
+    <div class="form">
+      <app-key-value-table
+        keyPlaceholder="Campo"
+        [rows]="body().fields ?? []"
+        (rowsChange)="setFields($event)"
+      />
+
+      <h4 class="files-title">Archivos</h4>
+      @for (file of body().files ?? []; track $index) {
+        <div class="file">
+          <input
+            pInputText
+            class="cell"
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="Campo del archivo"
+            placeholder="Campo"
+            [value]="file.key"
+            (input)="patchFile($index, { key: text($event) })"
+          />
+          <label class="pick" [class.is-missing]="!file.data">
+            <input
+              type="file"
+              class="pick-input"
+              aria-label="Elegir archivo"
+              (change)="pick($index, $event)"
+            />
+            <i class="pi pi-paperclip" aria-hidden="true"></i>
+            <span class="pick-name">{{ file.name || 'Elegir archivo…' }}</span>
+            @if (file.name && !file.data) {
+              <span class="pick-warn">vuelve a elegirlo</span>
+            }
+          </label>
+          <button
+            type="button"
+            class="remove"
+            aria-label="Quitar archivo"
+            title="Quitar archivo"
+            (click)="removeFile($index)"
+          >
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        </div>
+      }
+      <div>
+        <p-button
+          label="Añadir archivo"
+          icon="pi pi-plus"
+          size="small"
+          severity="secondary"
+          [text]="true"
+          (onClick)="addFile()"
+        />
+      </div>
+      <p class="hint">
+        El contenido de los archivos no se guarda con la petición: al reabrirla hay que volver a
+        elegirlos.
+      </p>
+    </div>
   } @else {
     <div class="editor">
       <app-code-editor

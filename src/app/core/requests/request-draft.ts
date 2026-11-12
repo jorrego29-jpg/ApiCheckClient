@@ -4,6 +4,7 @@ import {
   EXECUTABLE_METHODS,
   ExecutableMethod,
   ExecuteRequestDto,
+  FormDataField,
   HttpMethod,
   KeyValue,
   ProtocolType,
@@ -95,6 +96,20 @@ export function toKeyValues(value: unknown): KeyValue[] {
 function toBody(value: unknown): RequestBody {
   if (isRecord(value) && typeof value['content'] === 'string') {
     const type = value['type'];
+    if (type === 'form-data') {
+      const files = Array.isArray(value['files']) ? value['files'].filter(isRecord) : [];
+      return {
+        type,
+        content: '',
+        fields: toKeyValues(value['fields']),
+        files: files.map((file) => ({
+          key: String(file['key'] ?? ''),
+          name: String(file['name'] ?? ''),
+          type: '',
+          data: '',
+        })),
+      };
+    }
     if (BODY_TYPES.includes(type as BodyType))
       return { type: type as BodyType, content: value['content'] };
   }
@@ -136,6 +151,20 @@ function normalizeAuth(auth: RequestAuth): RequestAuth {
 
 const isBlank = (row: KeyValue) => row.key.trim() === '' && row.value === '';
 
+function normalizeBody(body: RequestBody): RequestBody {
+  if (body.type === 'none') return EMPTY_BODY;
+  if (body.type !== 'form-data') return { type: body.type, content: body.content };
+  return {
+    type: 'form-data',
+    content: '',
+    fields: (body.fields ?? []).filter((row) => !isBlank(row)),
+    // De un archivo se guarda (y se compara) el campo y el nombre, no el contenido: pesaría megas en la base.
+    files: (body.files ?? [])
+      .filter((file) => file.key.trim() !== '' || file.name !== '')
+      .map(({ key, name }) => ({ key, name, type: '', data: '' })),
+  };
+}
+
 /** La misma petición en una sola forma, para compararla o guardarla: sin filas vacías ni restos de otro tipo de body o auth. */
 export function normalizeDraft(draft: RequestDraft): RequestDraft {
   return {
@@ -144,10 +173,7 @@ export function normalizeDraft(draft: RequestDraft): RequestDraft {
     url: draft.url,
     params: draft.params.filter((row) => !isBlank(row)),
     headers: draft.headers.filter((row) => !isBlank(row)),
-    body:
-      draft.body.type === 'none'
-        ? EMPTY_BODY
-        : { type: draft.body.type, content: draft.body.content },
+    body: normalizeBody(draft.body),
     auth: normalizeAuth(draft.auth),
     soapAction: draft.soapAction,
     wsdlUrl: draft.wsdlUrl,
@@ -348,6 +374,25 @@ export function toExecutionDto(
   const hasBody = contentType !== undefined && content.trim() !== '';
   if (hasBody && !hasHeader(headers, 'content-type')) headers['Content-Type'] = contentType;
 
+  // En form-data el Content-Type (con su boundary) lo pone el backend. Un archivo sin contenido
+  // (petición reabierta: solo se guardó su nombre) no viaja.
+  const formData: FormDataField[] | undefined =
+    draft.body.type === 'form-data'
+      ? [
+          ...(draft.body.fields ?? [])
+            .filter(isActive)
+            .map((row) => ({ key: row.key.trim(), value: row.value })),
+          ...(draft.body.files ?? [])
+            .filter((file) => file.key.trim() !== '' && file.data !== '')
+            .map((file) => ({
+              key: file.key.trim(),
+              value: file.data,
+              fileName: file.name,
+              ...(file.type ? { contentType: file.type } : {}),
+            })),
+        ]
+      : undefined;
+
   // axios no admite una clave repetida en `params`; con repetidas, la query viaja dentro de la URL.
   const active = draft.params.filter(isActive);
   const repeated = new Set(active.map((row) => row.key.trim())).size !== active.length;
@@ -363,6 +408,7 @@ export function toExecutionDto(
     ...(Object.keys(queryParams).length ? { queryParams } : {}),
     // El texto del body viaja tal cual: así las {{variables}} sin comillas siguen siendo válidas.
     ...(hasBody ? { body: content } : {}),
+    ...(formData ? { formData } : {}),
     ...(context.ignoreSsl ? { ignoreSsl: true } : {}),
     ...(context.workspaceId ? { workspaceId: context.workspaceId } : {}),
     ...(context.environmentId ? { environmentId: context.environmentId } : {}),
